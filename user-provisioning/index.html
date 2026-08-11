@@ -209,7 +209,7 @@
         <li>First run on a machine: Windows SmartScreen may prompt — click <strong>More info → Run anyway</strong>.</li>
         <li>Sign in to Microsoft Graph and Exchange Online when prompted.</li>
       </ol>
-      <div class="note">Launch through the <code>.bat</code>, not the <code>.ps1</code> directly — it starts PowerShell in the mode the wizard and the Exchange sign-in require.</div>
+      <div class="note"><strong>Always launch with the <code>.bat</code>, never the <code>.ps1</code> directly.</strong> Running the <code>.ps1</code> on its own can start PowerShell in the wrong mode and cause a "single-threaded apartment" error at the Exchange sign-in. The <code>.bat</code> avoids this.</div>
     </div>
     <div class="panel">
       <h2>Prerequisites</h2>
