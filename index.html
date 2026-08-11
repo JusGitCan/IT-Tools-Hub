@@ -68,18 +68,7 @@
     transition: background .35s ease, color .35s ease;
   }
 
-  /* Ambient brand ripple behind the hero — the CorroHealth arc motif */
-  .ambient {
-    position: fixed;
-    top: -220px; left: 50%;
-    transform: translateX(-50%);
-    width: 1100px; height: 700px;
-    pointer-events: none; z-index: 0;
-    opacity: .5;
-  }
-  html[data-theme="light"] .ambient { opacity: .35; }
-
-  .shell { position: relative; z-index: 1; max-width: 1180px; margin: 0 auto; padding: 0 28px; }
+  .shell { max-width: 1180px; margin: 0 auto; padding: 0 28px; }
 
   /* ---------- Top bar ---------- */
   header {
@@ -87,7 +76,7 @@
     padding: 22px 0 26px;
   }
   .brand { display: flex; align-items: center; gap: 13px; }
-  .brand .mark { width: 46px; height: 40px; flex-shrink: 0; }
+  .brand .mark { width: 52px; height: 40px; flex-shrink: 0; object-fit: contain; }
   .brand-text { display: flex; align-items: baseline; gap: 10px; }
   .brand-text .name {
     font-family: 'Space Grotesk', sans-serif;
@@ -156,10 +145,10 @@
   /* ---------- Sections ---------- */
   .section { padding: 40px 0 4px; }
   .eyebrow {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px; letter-spacing: .22em; text-transform: uppercase;
-    color: var(--text-faint); margin-bottom: 20px;
-    display: flex; align-items: center; gap: 12px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 15px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+    color: var(--text); margin-bottom: 20px;
+    display: flex; align-items: center; gap: 14px;
   }
   .eyebrow::after { content: ""; flex: 1; height: 1px; background: var(--border-soft); }
 
@@ -289,45 +278,12 @@
 </head>
 <body>
 
-<!-- Ambient CorroHealth arc ripple -->
-<svg class="ambient" viewBox="0 0 1100 700" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-  <defs>
-    <linearGradient id="rip" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0" stop-color="#9ccb3b"/>
-      <stop offset="0.5" stop-color="#35b6b6"/>
-      <stop offset="1" stop-color="#5b2d86"/>
-    </linearGradient>
-  </defs>
-  <g stroke="url(#rip)" stroke-width="2" opacity="0.6">
-    <circle cx="550" cy="230" r="60"/>
-    <path d="M420 300 A130 130 0 0 0 680 300"/>
-    <path d="M360 320 A190 190 0 0 0 740 320"/>
-    <path d="M300 340 A250 250 0 0 0 800 340"/>
-    <path d="M240 360 A310 310 0 0 0 860 360"/>
-  </g>
-</svg>
-
 <div class="shell">
 
   <!-- Top bar -->
   <header>
     <div class="brand">
-      <!-- CorroHealth mark, recreated as SVG for the dark theme -->
-      <svg class="mark" viewBox="0 0 120 100" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <defs>
-          <linearGradient id="corro" x1="0" y1="0.4" x2="1" y2="0.6">
-            <stop offset="0" stop-color="#9ccb3b"/>
-            <stop offset="0.5" stop-color="#35b6b6"/>
-            <stop offset="1" stop-color="#5b2d86"/>
-          </linearGradient>
-        </defs>
-        <g stroke="url(#corro)" stroke-width="7" stroke-linecap="round">
-          <circle cx="60" cy="30" r="12"/>
-          <path d="M38 52 A22 22 0 0 0 82 52"/>
-          <path d="M28 58 A32 32 0 0 0 92 58"/>
-          <path d="M18 64 A42 42 0 0 0 102 64"/>
-        </g>
-      </svg>
+      <img class="mark" src="data:image/png;base64,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" alt="CorroHealth" />
       <div class="brand-text">
         <span class="name">CorroHealth</span>
         <span class="tag">Power Tools</span>
@@ -393,6 +349,16 @@ const TOOLS = [
     url     : 'user-provisioning/',
   },
 
+  {
+    section : 'Procurement',
+    name    : 'PO Builder',
+    desc    : 'Turn vendor quote PDFs into Corrohealth-formatted purchase orders. Drop in a Softchoice, SAS, Sonar, Smartsheet, or FastSpring quote and get a signed-ready xlsx with vendor info, line items, tax, and totals filled in.',
+    icon    : 'dollar',
+    tint    : 't-gold',
+    status  : 'live',
+    url     : 'po-builder/',
+  },
+
   // Add one object per tool. Copy the template below, uncomment it, and fill it in.
   // {
   //   section : 'Daily Operations',   // heading this tile sits under (new names create new sections)
@@ -418,6 +384,7 @@ const ICONS = {
   wallet:  '<path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4z"/>',
   grid:    '<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>',
   device:  '<rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>',
+  dollar:  '<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>',
 };
 
 const LOCK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>';

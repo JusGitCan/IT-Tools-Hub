@@ -1,0 +1,1733 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>PO Builder — Corrohealth IT</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #f5f4f1;
+    --surface: #ffffff;
+    --surface2: #f0efe9;
+    --border: rgba(0,0,0,0.12);
+    --border-med: rgba(0,0,0,0.22);
+    --text: #1a1a18;
+    --text-muted: #6b6b66;
+    --text-faint: #9d9d97;
+    --blue: #185FA5;
+    --blue-light: #E6F1FB;
+    --blue-dark: #0C447C;
+    --blue-text: #0C447C;
+    --green-bg: #EAF3DE;
+    --green-text: #3B6D11;
+    --red-bg: #FCEBEB;
+    --red-text: #A32D2D;
+    --radius: 8px;
+    --radius-lg: 12px;
+    --font: 'DM Sans', system-ui, sans-serif;
+    --font-mono: 'DM Mono', 'Fira Mono', monospace;
+  }
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap');
+
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 2rem 1rem;
+  }
+
+  .page {
+    max-width: 940px;
+    margin: 0 auto;
+  }
+
+  /* Header */
+  .header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 1.75rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .header-left h1 {
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: -0.02em;
+  }
+  .header-left p {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+  .logo-mark {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-faint);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  /* Cards */
+  .card {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1rem;
+  }
+  .section-title {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-faint);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 0.5px;
+    background: var(--border);
+  }
+
+  /* Drop zone */
+  .drop-zone {
+    border: 1.5px dashed var(--border-med);
+    border-radius: var(--radius-lg);
+    padding: 2rem 1.5rem;
+    text-align: center;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+    position: relative;
+    margin-bottom: 1rem;
+    background: var(--surface);
+  }
+  .drop-zone:hover, .drop-zone.drag-over {
+    background: var(--blue-light);
+    border-color: var(--blue);
+  }
+  .drop-zone input[type=file] {
+    position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+  }
+  .dz-icon { margin: 0 auto 10px; opacity: 0.35; display: block; }
+  .dz-text { font-size: 14px; color: var(--text-muted); }
+  .dz-text span { color: var(--blue); font-weight: 500; }
+  .dz-sub { font-size: 12px; color: var(--text-faint); margin-top: 4px; }
+
+  .parse-status {
+    font-size: 13px; padding: 9px 14px; border-radius: var(--radius);
+    margin-bottom: 1rem; display: none; font-weight: 500;
+  }
+  .parse-status.ok  { background: var(--green-bg); color: var(--green-text); display: block; }
+  .parse-status.err { background: var(--red-bg);   color: var(--red-text);   display: block; }
+  .parse-status.loading { background: var(--surface2); color: var(--text-muted); display: block; }
+
+  /* PO badge */
+  .po-badge {
+    display: inline-block;
+    background: var(--blue-light);
+    color: var(--blue-text);
+    font-size: 14px; font-weight: 500;
+    padding: 5px 16px;
+    border-radius: var(--radius);
+    font-family: var(--font-mono);
+    letter-spacing: 0.03em;
+  }
+
+  /* Ticket card */
+  .ticket-card {
+    background: var(--surface2);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 16px;
+  }
+  .ticket-label {
+    font-size: 10px; font-weight: 600; color: var(--text-faint);
+    text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px;
+  }
+
+  /* Form fields */
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  .field { display: flex; flex-direction: column; gap: 4px; margin-bottom: 10px; }
+  .field:last-child { margin-bottom: 0; }
+  label {
+    font-size: 10px; font-weight: 600; color: var(--text-faint);
+    text-transform: uppercase; letter-spacing: 0.08em;
+  }
+  input[type=text], input[type=date], input[type=number], textarea, select {
+    font-family: var(--font);
+    font-size: 14px;
+    color: var(--text);
+    background: var(--surface);
+    border: 0.5px solid var(--border-med);
+    border-radius: var(--radius);
+    padding: 8px 10px;
+    width: 100%;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    outline: none;
+  }
+  input:focus, textarea:focus {
+    border-color: var(--blue);
+    box-shadow: 0 0 0 3px rgba(24,95,165,0.1);
+  }
+  textarea { resize: vertical; min-height: 72px; }
+
+  /* Line items */
+  .li-hdr {
+    display: grid;
+    grid-template-columns: 140px 1fr 45px 70px 82px 82px 88px 82px;
+    gap: 6px;
+    padding: 0 36px 6px 12px;
+  }
+  .col-hdr { font-size: 10px; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.06em; }
+  .line-item {
+    background: var(--surface2);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 8px 10px;
+    margin-bottom: 6px;
+    position: relative;
+  }
+  .li-grid {
+    display: grid;
+    grid-template-columns: 140px 1fr 45px 70px 82px 82px 88px 82px;
+    gap: 6px;
+    align-items: center;
+  }
+  .li-grid input {
+    background: var(--surface);
+    padding: 6px 8px;
+    font-size: 13px;
+  }
+  .remove-btn {
+    position: absolute; top: 8px; right: 8px;
+    background: none; border: none;
+    color: var(--text-faint); cursor: pointer;
+    font-size: 14px; line-height: 1; padding: 2px;
+    border-radius: 4px;
+    transition: color 0.1s, background 0.1s;
+  }
+  .remove-btn:hover { color: var(--red-text); background: var(--red-bg); }
+  .ext-display {
+    font-size: 13px; color: var(--text-muted);
+    font-family: var(--font-mono); text-align: right;
+    padding-right: 4px;
+  }
+  .add-btn {
+    background: none;
+    border: 0.5px dashed var(--border-med);
+    border-radius: var(--radius);
+    color: var(--text-muted);
+    font-size: 13px; font-family: var(--font);
+    padding: 7px 16px; cursor: pointer; margin-bottom: 1rem;
+    width: 100%;
+    transition: background 0.12s, color 0.12s;
+  }
+  .add-btn:hover { background: var(--surface2); color: var(--text); }
+
+  /* Totals */
+  .totals {
+    background: var(--surface2);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    margin-bottom: 1.25rem;
+  }
+  .tr {
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 14px; color: var(--text-muted); padding: 4px 0;
+  }
+  .tr.grand {
+    font-size: 15px; font-weight: 600; color: var(--text);
+    border-top: 0.5px solid var(--border); margin-top: 8px; padding-top: 10px;
+  }
+  .tr input[type=number] {
+    width: 96px; font-size: 13px; text-align: right;
+    padding: 4px 8px; background: var(--surface);
+  }
+
+  /* Actions */
+  .actions { display: flex; gap: 10px; flex-wrap: wrap; padding-top: 0.5rem; }
+  .btn-exp {
+    background: var(--blue); color: #fff;
+    border: none; border-radius: var(--radius);
+    padding: 10px 22px; font-size: 14px; font-weight: 500;
+    font-family: var(--font); cursor: pointer;
+    transition: background 0.15s;
+  }
+  .btn-exp:hover { background: var(--blue-dark); }
+  .btn-sec {
+    background: var(--surface); color: var(--text);
+    border: 0.5px solid var(--border-med); border-radius: var(--radius);
+    padding: 10px 18px; font-size: 14px; font-family: var(--font); cursor: pointer;
+    transition: background 0.12s;
+  }
+  .btn-sec:hover { background: var(--surface2); }
+  .btn-clr {
+    background: none; color: var(--text-muted);
+    border: 0.5px solid var(--border); border-radius: var(--radius);
+    padding: 10px 16px; font-size: 14px; font-family: var(--font); cursor: pointer;
+  }
+  .btn-clr:hover { color: var(--text); }
+
+  /* Toast */
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    background: var(--text); color: #fff;
+    padding: 10px 24px; border-radius: var(--radius);
+    font-size: 13px; opacity: 0;
+    transition: opacity 0.25s; pointer-events: none; z-index: 999;
+  }
+  .toast.show { opacity: 1; }
+
+  @media (max-width: 640px) {
+    .grid2, .grid3 { grid-template-columns: 1fr; }
+    .li-hdr, .li-grid { grid-template-columns: 1fr 1fr; }
+    .col-hdr:nth-child(n+3) { display: none; }
+  }
+/* ── Version footer + update message ── */
+.app-footer {
+  margin-top: 36px;
+  padding: 18px 16px 24px;
+  border-top: 1px solid #e0e0e0;
+  font-size: 12px;
+  color: #777;
+  text-align: center;
+}
+.app-footer .app-version { display: inline-block; }
+.app-footer .link-btn {
+  background: none;
+  border: none;
+  color: #2168d1;
+  cursor: pointer;
+  text-decoration: underline;
+  margin-left: 14px;
+  font: inherit;
+  padding: 0;
+}
+.app-footer .link-btn:hover { color: #1a4fa1; }
+.update-msg {
+  margin: 14px auto 0;
+  padding: 10px 14px;
+  border-radius: 6px;
+  background: #f0f7ff;
+  border: 1px solid #c5dcf5;
+  color: #1a4d7a;
+  text-align: left;
+  max-width: 560px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.update-msg.ok  { background: #effbf0; border-color: #c3e3c5; color: #1a5a26; }
+.update-msg.err { background: #fff0f0; border-color: #f0c5c5; color: #8a1a1a; }
+.update-msg a { color: inherit; word-break: break-all; }
+.update-msg strong { font-weight: 600; }
+
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="header">
+    <div class="header-left">
+      <h1>Purchase Order Builder</h1>
+      <p>Corrohealth IT — drop a vendor quote PDF to auto-fill, or enter details manually</p>
+    </div>
+    <span class="logo-mark">Corrohealth</span>
+  </div>
+
+  <!-- Drop Zone -->
+  <div class="drop-zone" id="dropZone">
+    <input type="file" accept=".pdf" id="fileInput" />
+    <svg class="dz-icon" width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="5" y="2" width="20" height="28" rx="3" stroke="currentColor" stroke-width="1.6"/>
+      <path d="M20 2v7h6" stroke="currentColor" stroke-width="1.6"/>
+      <path d="M12 20l5-5 5 5M17 15v9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <div class="dz-text">Drop vendor quote PDF here, or <span>browse to upload</span></div>
+    <div class="dz-sub">Softchoice, SAS, Sonar, FastSpring, and similar quote formats supported</div>
+  </div>
+  <div class="parse-status" id="parseStatus"></div>
+
+  <!-- PO Identity -->
+  <div class="card">
+    <div class="section-title">PO Identity</div>
+    <div class="grid2">
+      <div class="field">
+        <label>PO Date</label>
+        <input type="date" id="poDate" />
+      </div>
+      <div class="field">
+        <label>PO Name / Description</label>
+        <input type="text" id="poName" placeholder="e.g. MacBook-Pro-Purchase" />
+      </div>
+    </div>
+    <div>
+      <div style="font-size:10px;font-weight:600;color:var(--text-faint);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">Generated PO Number</div>
+      <div class="po-badge" id="poBadge">—</div>
+    </div>
+  </div>
+
+  <!-- Ticket -->
+  <div class="card">
+    <div class="section-title">Ticket ID <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:11px;color:var(--text-faint)">&nbsp;— This Section To Be Completed By Accounting</span></div>
+    <div class="ticket-card">
+      <div class="ticket-label">Ticket ID Number</div>
+      <input type="text" id="ticketNum" placeholder="e.g. SR-453955  |  Leave blank if not yet assigned"
+        style="width:100%;font-size:15px;font-family:var(--font-mono);background:transparent;border:none;box-shadow:none;padding:0;outline:none;color:var(--text)" />
+    </div>
+  </div>
+
+  <!-- Vendor -->
+  <div class="card">
+    <div class="section-title">Vendor</div>
+    <div class="grid2">
+      <div class="field">
+        <label>Vendor Name</label>
+        <input type="text" id="vendorName" placeholder="e.g. Softchoice Corporation" />
+      </div>
+      <div class="field">
+        <label>Vendor Contact</label>
+        <input type="text" id="vendorContact" placeholder="Email or phone" />
+      </div>
+    </div>
+    <div class="field">
+      <label>Vendor Address</label>
+      <input type="text" id="vendorAddr" placeholder="Street, City, State ZIP" />
+    </div>
+    <div class="grid2">
+      <div class="field">
+        <label>Quote / Reference #</label>
+        <input type="text" id="quoteNum" placeholder="e.g. Q-2803797" />
+      </div>
+      <div class="field">
+        <label>Quote Date</label>
+        <input type="text" id="quoteDate" placeholder="e.g. 01-Apr-2026" />
+      </div>
+    </div>
+  </div>
+
+  <!-- Request Details -->
+  <div class="card">
+    <div class="section-title">Request Details</div>
+    <div class="grid2">
+      <div class="field">
+        <label>Dept #</label>
+        <input type="text" id="deptNum" value="27" />
+      </div>
+      <div class="field">
+        <label>Department Name</label>
+        <input type="text" id="deptName" value="IT - Shared Services" />
+      </div>
+    </div>
+    <div class="field">
+      <label>Business Use Case</label>
+      <textarea id="useCase" placeholder="Describe the business justification for this purchase..."></textarea>
+    </div>
+  </div>
+
+  <!-- Line Items -->
+  <div class="card">
+    <div class="section-title">Line Items</div>
+    <div class="li-hdr">
+      <span class="col-hdr">Item # / Mfg SKU</span>
+      <span class="col-hdr">Description</span>
+      <span class="col-hdr">Qty</span>
+      <span class="col-hdr">Billing</span>
+      <span class="col-hdr">Start Date</span>
+      <span class="col-hdr">End Date</span>
+      <span class="col-hdr">Unit Price</span>
+      <span class="col-hdr">Extended</span>
+    </div>
+    <div id="lineItems"></div>
+    <button class="add-btn" onclick="addLine()">+ Add line item</button>
+
+    <div class="totals">
+      <div class="tr"><span>Subtotal</span><span id="subtotal">$0.00</span></div>
+      <div class="tr"><span>Delivery</span><input type="number" id="deliveryAmt" value="0" min="0" step="0.01" oninput="recalc()" /></div>
+      <div class="tr"><span>Local Tax</span><input type="number" id="taxAmt" value="0" min="0" step="0.01" oninput="recalc()" /></div>
+      <div class="tr grand"><span>Total Request Amount</span><span id="grandTotal">$0.00</span></div>
+    </div>
+
+    <div class="actions">
+      <button id="exportBtn" class="btn-exp" onclick="exportXLSX()">Loading libraries…</button>
+      <button class="btn-sec" onclick="previewPO()">Review with AI ↗</button>
+      <button class="btn-clr" onclick="clearAll()">Clear form</button>
+    </div>
+  </div>
+
+</div>
+
+<footer class="app-footer">
+  <span class="app-version">Corrohealth IT · PO Builder v<span id="appVer">—</span> · <span id="appDate">—</span></span>
+  <button id="updateBtn" class="link-btn" type="button">Check for Updates</button>
+  <div id="updateMsg" class="update-msg" hidden></div>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<!-- Libraries loaded from CDN. Requires internet on first load; browsers cache them afterwards. -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" defer></script>
+<script>
+// Point PDF.js at its worker on the same CDN, and enable the export button once ExcelJS loads.
+document.addEventListener('DOMContentLoaded',()=>{
+  if (window.pdfjsLib) {
+    pdfjsLib.GlobalWorkerOptions.workerSrc =
+      'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  }
+  const btn=document.getElementById('exportBtn');
+  if(btn){btn.disabled=false; btn.textContent='Export to Excel (.xlsx)';}
+});
+</script>
+<script>
+// workerSrc configured via CDN in the preceding script block
+const LOGO_B64='/9j/4AAQSkZJRgABAQEA3ADcAAD/2wBDAAIBAQEBAQIBAQECAgICAgQDAgICAgUEBAMEBgUGBgYFBgYGBwkIBgcJBwYGCAsICQoKCgoKBggLDAsKDAkKCgr/2wBDAQICAgICAgUDAwUKBwYHCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgr/wAARCADlA4UDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD9/KKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooqj4l8S6F4P0K58TeJtTis7Gzj8y5uZjgIOn1JJIAAySSAASQKCZSjCLlJ2SL1Yfir4m/DjwNMtt4z8e6NpMrxmSOLUdTihd1HdVdgWH0FfJfx7/bc8deNriXQ/hndXGgaQBtNxGwW8uOc7i45hHAwqHPXLEHA8L0rwP4++I2oTp4R8K6rrVwHDXLWNnJOVLnhnKg7cnPLe9ergMtjiveqT5UfmeeeI9PB1fY5dQdaXfVJ+iSbf4fNH3Z/w3H+yuL8ac/xctkkZ9oaSwuVjz/10MW0D3ziu78H/ABR+GvxCknh8A/EHRNbe1Cm5TSNVhuTCGztLCNjtzg4z1wa/PLxB+wv+1ZLZvdxfCOd1VCxVNTtC+PZRLuJ9sZrwrx14Y+JHwo161fxH4d1zwzqsYW6sTe2k1ncLhsLLHuCsMMpww7qeeK+gfDmV4hWw2Iu/WMvyseNgvEPimhJPNMByRf8AdnT/APSua5+z+Qehor82f2U/+CsXjn4cavZeBv2kbqXXvDjv5X/CReWX1GwXaoVpMf8AHzGCMtkGb52YM5Cxn9GvD3iHQ/FmhWfifwzq1vf6dqFslxZXtrKHjnicBldWHBBBBzXzOPy3FZdU5aq0ezWzP1HKc5wWc0PaUHqt091/wPNFyiiiuA9YKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAorFvfiN4F07X08L33imziv3OBbvLyCeik9FY9gSCcj1FbXWubD4zB4uU40KkZuDtLlafK+zts/J6jaa3Cisbxb8Q/BPgSOKTxb4ktrHzmxEkrEu/uFAJwO5xgVqWN/Y6pZx6hpl5FcW8yBoZ4JA6Op6EEcEe9aRr0Z1HTjJOS3V1deq6E80W7X1Ja+O/20vjTc+N/Gcnw60e4I0nQpyk4XcPtF4uVctnHCHKDjqGOSGGPq/x1r8vhTwVq/imCBZX03S7i6SNjw5jjZwD7HFfntpej6j4u8TWXh6zlDXeqX0dvE8zHBklcKCx5PVuTWOIquNSMF1Pi+M8ZVhhYYWn9vfzStZfN/kem/st/spj4wy/8Jx47jnh8OwTbYIFJRtRdThgG6iMH5WZeScqCCCR9i6B4e0LwtpEOg+G9HtrCyt1IgtbSBY40ySThVAAySSfUkmm+GfDuk+EvD9l4Y0O2ENpp9qlvbR5yQigAZPc8ZJ6k81erulOUopN6I9jIshwmS4ZKEU6jXvS6t9vRdF+oVjePPh54I+KHhm48HfEHwvZavpl0pEtpfQh1zggMvdHGTh1IZTyC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RQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQB//9k=';
+
+
+let lineCount=0;
+let vendorType='standard'; // set by PDF parser: standard | smartsheet | sonar
+
+function today(){return new Date().toISOString().slice(0,10)}
+document.getElementById('poDate').value=today();
+
+function fmtDate(d){
+  if(!d) return '';
+  const[y,m,day]=d.split('-');
+  return m+day+y;
+}
+function updateBadge(){
+  const d=document.getElementById('poDate').value;
+  const po=d?'POTX'+fmtDate(d)+'-1':'POTX——-1';
+  document.getElementById('poBadge').textContent=po;
+  return po;
+}
+['poDate','poName'].forEach(id=>document.getElementById(id).addEventListener('input',updateBadge));
+
+/* ── Drop zone ── */
+const dropZone=document.getElementById('dropZone');
+const fileInput=document.getElementById('fileInput');
+const statusEl=document.getElementById('parseStatus');
+
+dropZone.addEventListener('dragover',e=>{e.preventDefault();dropZone.classList.add('drag-over')});
+dropZone.addEventListener('dragleave',()=>dropZone.classList.remove('drag-over'));
+dropZone.addEventListener('drop',e=>{
+  e.preventDefault();dropZone.classList.remove('drag-over');
+  const f=e.dataTransfer.files[0];
+  if(f&&f.type==='application/pdf') parsePDF(f);
+  else showStatus('err','Please drop a PDF file.');
+});
+fileInput.addEventListener('change',e=>{if(e.target.files[0]) parsePDF(e.target.files[0])});
+
+/* ── PDF parser ── */
+async function parsePDF(file){
+  showStatus('loading','Reading PDF — this takes a moment...');
+  try{
+    const buf=await file.arrayBuffer();
+    const pdf=await pdfjsLib.getDocument({data:buf}).promise;
+
+    let allItems=[];
+    for(let p=1;p<=pdf.numPages;p++){
+      const page=await pdf.getPage(p);
+      const vp=page.getViewport({scale:1});
+      const tc=await page.getTextContent();
+      tc.items.forEach(item=>{
+        allItems.push({
+          str:item.str,
+          x:Math.round(item.transform[4]),
+          y:Math.round(vp.height-item.transform[5]),
+          page:p
+        });
+      });
+    }
+
+    const plainText=allItems.map(i=>i.str).join(' ');
+
+    // ── SMARTSHEET FORMAT (completely different layout from Softchoice) ──
+    if(/smartsheet/i.test(plainText)){
+      // Quote number — "Order Q-6481691"
+      const smQ=plainText.match(/Order\s+(Q-[\d]+)/i);
+      if(smQ) document.getElementById('quoteNum').value=smQ[1];
+
+      // Date from document generation timestamp
+      const smD=plainText.match(/(\d{1,2}\/\d{1,2}\/\d{4})/);
+      if(smD) document.getElementById('quoteDate').value=smD[1];
+
+      vendorType='smartsheet';
+
+      // Vendor
+      document.getElementById('vendorName').value='Smartsheet, Inc.';
+      document.getElementById('vendorAddr').value='500 106th Ave NE, Suite 200, Bellevue, WA 98004';
+      document.getElementById('vendorContact').value='smartsheet.com';
+
+      // Line items — anchor after "Total Price" header to skip column header row
+      // Captures: [1]=product [2]=unitPrice [3]=qty [4]=subscriptionTerm (optional)
+      const smRe=/(?:Total Price\s+)([A-Za-z][A-Za-z0-9\s\-\/\+,]+?)\s+(?:US|EU|APAC)\s+([\d,]+\.\d{2})\s+(\d+)\s+[\d,]+\.\d{2}\s+(?:Annual|Monthly|Quarterly)(?:\s+([\d\/]+\s+to\s+[\d\/]+(?:\s+\([^)]+\))?))?/gi;
+      const smLines=[]; let smM;
+      while((smM=smRe.exec(plainText))!==null){
+        // itemNum = product name (goes to col A in export)
+        // desc    = subscription term dates (goes to col D in export)
+        smLines.push({itemNum:smM[1].trim(),sku:'',desc:smM[4]?smM[4].trim():'',qty:smM[3],price:smM[2].replace(/,/g,''),billingFreq:''});
+      }
+
+      // Totals — Total = full subscription commitment, Due Now = prorated first payment
+      const smTotal=plainText.match(/Total\s+([\d,]+\.\d{2})\s+USD/i);
+      const totalAmt=smTotal?parseFloat(smTotal[1].replace(/,/g,'')):0;
+      const annualSum=smLines.reduce((s,l)=>s+(parseFloat(l.qty)||0)*(parseFloat(l.price)||0),0);
+      // Any amount above the annual sum is prorated charges — put in delivery field
+      const prorated=parseFloat(Math.max(0,totalAmt-annualSum).toFixed(2));
+      document.getElementById('deliveryAmt').value=prorated>0?prorated:'0';
+      document.getElementById('taxAmt').value='0';
+
+      // Fill line items
+      document.getElementById('lineItems').innerHTML=''; lineCount=0;
+      if(smLines.length>0){
+        smLines.forEach(l=>addLine(l));
+        showStatus('ok','Smartsheet quote imported — '+smLines.length+' line item'+(smLines.length!==1?'s':'')+' found. Add ticket # and business use case before exporting.');
+      } else {
+        addLine();
+        showStatus('err','Could not parse Smartsheet line items — please enter them manually.');
+      }
+      recalc(); return;
+    }
+
+    // ── SONARSOURCE FORMAT (3-tier discount pricing: List → Volume Discount → Disc%) ──
+    if(/SonarSource/i.test(plainText)){
+      // Quote number — "Order Form Number: Q-22045-1" → we strip the redundant "Q-" prefix
+      // so the export shows "Quote-22045-1" rather than the awkward "Quote-Q-22045-1"
+      const snQ=plainText.match(/Order\s+Form\s+Number[:\s]+Q-([\d\-]+)/i);
+      if(snQ) document.getElementById('quoteNum').value=snQ[1];
+
+      // Date — "Issuance Date: ... 19-Feb-2026" (Sonar lists 4 labels in a row, then the values; skip non-digit chars until the first date)
+      const snD=plainText.match(/Issuance\s+Date:[^\d]*?(\d{1,2}-[A-Za-z]{3}-\d{4})/i);
+      if(snD) document.getElementById('quoteDate').value=snD[1];
+
+      vendorType='sonar';
+
+      // Vendor info (also set by the auto-fill chain, but ensure it here for the dedicated path)
+      document.getElementById('vendorName').value='SonarSource Sarl';
+      document.getElementById('vendorContact').value='contact@sonarsource.com  |  +41 22 510 2424';
+      document.getElementById('vendorAddr').value='P.O. Box 765, 1215 Geneva 15, Switzerland';
+
+      // Bound the regex to just the line-item block (between header row and Subtotal label)
+      // to avoid false matches on things like "TERMS AND CONDITIONS"
+      const sBlockStart=plainText.indexOf('Price Per Line');
+      const sBlockEnd=plainText.indexOf('Subtotal:',sBlockStart);
+      const itemBlock=(sBlockStart>=0&&sBlockEnd>sBlockStart)
+        ?plainText.slice(sBlockStart+'Price Per Line'.length,sBlockEnd)
+        :plainText;
+
+      // Captures (1-based):
+      //   1=sku  2=product  3=qty
+      //   4=start-day "27-Feb"  5=start-year "2026"  6=end-day  7=end-year
+      //   8=listPrice  9=volDiscount(optional, missing on PRORATED rows)
+      //   10=yearlyUnit  11=discPct  12=pricePerLine
+      // SKU lookahead allows whitespace OR a capital-then-lowercase letter (e.g. "PRORATAPro rata...").
+      const snRe=/([A-Z][A-Z0-9]{3,14})(?=\s|[A-Z][a-z]|$)\s*(.+?)\s+(\d+(?:\.\d{1,2})?)\s+(\d{1,2}-[A-Za-z]{3})-?\s*(\d{4})\s*(\d{1,2}-[A-Za-z]{3})-?\s*(\d{4})\s*USD\s*(-?\s*[\d,]+\.\d{2})\s+(?:USD\s*(-?\s*[\d,]+\.\d{2})\s+)?USD\s*(-?\s*[\d,]+\.\d{2})\s+([\d.]+)\s+USD\s*(-?\s*[\d,]+\.\d{2})/g;
+
+      const parseAmt=s=>s?parseFloat(s.replace(/[,\s]/g,'')):null;
+      const snLines=[]; let snM;
+      while((snM=snRe.exec(itemBlock))!==null){
+        snLines.push({
+          sku:snM[1],
+          product:snM[2].replace(/\s+/g,' ').trim(),
+          qty:parseFloat(snM[3]),
+          startDate:snM[4]+'-'+snM[5],
+          endDate:snM[6]+'-'+snM[7],
+          listPrice:parseAmt(snM[8]),
+          volDiscount:parseAmt(snM[9]),  // null on PRORATED rows
+          yearlyUnit:parseAmt(snM[10]),
+          discPct:parseFloat(snM[11]),
+          pricePerLine:parseAmt(snM[12])
+        });
+      }
+
+      // Totals — Sonar quotes list "Subtotal:", "Sales Tax:", "Total:" with USD amounts
+      const snTax=plainText.match(/Sales\s*Tax:\s*USD\s*([\d,]+\.\d{2})/i);
+      const snTaxAmt=snTax?parseFloat(snTax[1].replace(/,/g,'')):0;
+      document.getElementById('taxAmt').value=snTaxAmt>0?snTaxAmt:'0';
+      document.getElementById('deliveryAmt').value='0';
+
+      // Fill line items — for the UI subtotal to match SUM(L) in the export, store qty=1 and
+      // price=pricePerLine in the standard fields. The Sonar-specific values (list, vol disc,
+      // yearly unit, disc%, actual qty) ride along as data-* attributes via addLine.
+      document.getElementById('lineItems').innerHTML=''; lineCount=0;
+      if(snLines.length>0){
+        snLines.forEach(l=>addLine({
+          itemNum:l.sku, sku:'', desc:l.product,
+          qty:1, price:l.pricePerLine,
+          startDate:l.startDate, endDate:l.endDate,
+          sonarQty:l.qty,
+          sonarListPrice:l.listPrice,
+          sonarVolDiscount:l.volDiscount,
+          sonarYearlyUnit:l.yearlyUnit,
+          sonarDiscPct:l.discPct,
+          sonarPricePerLine:l.pricePerLine
+        }));
+        showStatus('ok','SonarSource quote imported \u2014 '+snLines.length+' line item'+(snLines.length!==1?'s':'')+' found with discount pricing. Add ticket # and business use case before exporting.');
+      } else {
+        addLine();
+        showStatus('err','Could not parse SonarSource line items \u2014 please enter them manually.');
+      }
+      recalc(); return;
+    }
+
+    // ── FASTSPRING / IRONSOFTWARE FORMAT (reseller-style quote, no item#/SKU columns) ──
+    // Layout differs from Softchoice: a 4-column table "Description | Quantity | Tax | Amount"
+    // with per-line tax embedded in the row (instead of separate billing-freq/start/end columns).
+    // Vendor block uses FastSpring (the merchant/reseller who receives payment); the contact
+    // email defaults to ironsoftware support but can be edited manually for other FastSpring
+    // products if needed.
+    if(/FastSpring|ironsoftware/i.test(plainText)){
+      // Quote ID — "Quote ID: QUYVLUKCNMXJCDNIAQZQGBKIYHQU" (long alphanumeric, no Q- prefix)
+      const fsQ=plainText.match(/Quote\s+ID:\s+([A-Z0-9]+)/i);
+      if(fsQ) document.getElementById('quoteNum').value=fsQ[1];
+
+      // Date — "Creation Date: 2026 May 6" → reformat to canonical "06-May-2026"
+      const fsD=plainText.match(/Creation\s+Date:\s+(\d{4})\s+([A-Za-z]+)\s+(\d{1,2})/i);
+      if(fsD){
+        const month=fsD[2].slice(0,3);
+        const day=fsD[3].padStart(2,'0');
+        document.getElementById('quoteDate').value=`${day}-${month}-${fsD[1]}`;
+      }
+
+      vendorType='standard';
+      document.getElementById('vendorName').value='FastSpring';
+      document.getElementById('vendorAddr').value='801 Garden St, Suite 201, Santa Barbara, CA 93101';
+      document.getElementById('vendorContact').value='ordersupport@ironsoftware.com';
+
+      // Bound the line-item region between the "Description Quantity Tax Amount" column
+      // header and the "Subtotal US$" totals row, so the regex can't drift into header/totals.
+      const fsHeader=plainText.match(/Description\s+Quantity\s+Tax\s+Amount\s+/i);
+      const fsSubIdx=plainText.search(/Subtotal\s+US\$/i);
+      const fsItemBlock=(fsHeader&&fsSubIdx>fsHeader.index)
+        ?plainText.slice(fsHeader.index+fsHeader[0].length,fsSubIdx)
+        :'';
+
+      // Per-row pattern: <description> <qty> US$ <per-line tax> US$ <amount>
+      const fsRe=/(\S[\s\S]*?)\s+(\d+)\s+US\$\s*([\d,.]+)\s+US\$\s*([\d,.]+)/g;
+      const fsLines=[]; let fsM;
+      while((fsM=fsRe.exec(fsItemBlock))!==null){
+        fsLines.push({
+          itemNum:'',
+          sku:'',
+          desc:fsM[1].replace(/\s+/g,' ').trim(),
+          qty:fsM[2],
+          price:fsM[4].replace(/,/g,'')
+        });
+      }
+
+      // Tax — "Estimated Sales Tax (8.25%) US$ 123.34" or plain "Sales Tax US$ X.XX"
+      const fsTax=plainText.match(/(?:Estimated\s+)?Sales\s+Tax\s*(?:\([\d.]+%\))?\s+US\$\s*([\d,.]+)/i);
+      document.getElementById('taxAmt').value=fsTax?fsTax[1].replace(/,/g,''):'0';
+      document.getElementById('deliveryAmt').value='0';
+
+      document.getElementById('lineItems').innerHTML=''; lineCount=0;
+      if(fsLines.length>0){
+        fsLines.forEach(l=>addLine(l));
+        showStatus('ok','FastSpring quote imported \u2014 '+fsLines.length+' line item'+(fsLines.length!==1?'s':'')+'. Review and adjust as needed.');
+      } else {
+        addLine();
+        showStatus('err','Could not parse FastSpring line items \u2014 please enter them manually.');
+      }
+      recalc(); return;
+    }
+    const qm=plainText.match(/(Q-\d{5,})/)||plainText.match(/Quote[:\s#]*([A-Z0-9\-]{4,20})/i)||plainText.match(/Order[:\s#]*([A-Z0-9\-]{4,20})/i);
+    if(qm) document.getElementById('quoteNum').value=qm[1].trim();
+    const dm=plainText.match(/Date\s+(\d{1,2}-[A-Za-z]{3}-\d{4})/)||plainText.match(/Date\s+(\d{2}\/\d{2}\/\d{4})/)||plainText.match(/Date[:\s]+(\d{1,2}\/\d{1,2}\/\d{4})/);
+    if(dm) document.getElementById('quoteDate').value=dm[1];
+
+    // Vendor
+    const isKnownVendor=/Softchoice|sas\.com|smartsheet|SonarSource|FastSpring|ironsoftware/i.test(plainText);
+    if(/Softchoice/i.test(plainText)){
+      document.getElementById('vendorName').value='Softchoice Corporation';
+      document.getElementById('vendorContact').value='brandon.wu@softchoice.com  |  (800) 268-7638';
+      document.getElementById('vendorAddr').value='1 World Wide Way, Saint Louis, MO 63146';
+    } else if(/sas\.com/i.test(plainText)){
+      document.getElementById('vendorName').value='SAS Software';
+      document.getElementById('vendorContact').value='(919) 531-2982';
+      document.getElementById('vendorAddr').value='P.O. Box 610, Cary, NC 27512';
+    } else if(/SonarSource/i.test(plainText)){
+      document.getElementById('vendorName').value='SonarSource Sarl';
+      document.getElementById('vendorContact').value='contact@sonarsource.com  |  +41 22 510 2424';
+      document.getElementById('vendorAddr').value='P.O. Box 765, 1215 Geneva 15, Switzerland';
+    } else {
+      // ── GENERIC FALLBACK: unknown vendor ──
+      // Extract vendor name — look for company name near top of document
+      // Strategy: find lines in the first 30 items that look like a company name
+      const topItems=allItems.filter(i=>i.page===1).slice(0,60);
+      const topText=topItems.map(i=>i.str).join(' ');
+
+      // Try common patterns: "Prepared by [Company]", "From: [Company]", first bold/large text
+      const vendorPatterns=[
+        /(?:Prepared\s+(?:by|for)|From|Vendor|Supplier|Sold\s+by)[:\s]+([A-Z][A-Za-z0-9\s\.,&]+?)(?:\s{2,}|\n|$)/i,
+        /(?:Ship\s+From|Reseller|Partner)[:\s]+([A-Z][A-Za-z0-9\s\.,&]+?)(?:\s{2,}|\n|,|$)/i,
+      ];
+      let guessedVendor='';
+      for(const pat of vendorPatterns){
+        const m=topText.match(pat);
+        if(m&&m[1].trim().length>3){guessedVendor=m[1].trim();break;}
+      }
+
+      // Fallback: look for "Inc.", "LLC", "Corp", "Ltd" near top
+      if(!guessedVendor){
+        const corpM=topText.match(/([A-Z][A-Za-z0-9\s]{2,30}(?:Inc\.?|LLC|Corp\.?|Ltd\.?|Limited|Solutions|Technologies|Systems|Software|Services|Group|Partners|Co\.))/);
+        if(corpM) guessedVendor=corpM[1].trim();
+      }
+
+      // Try to extract address — look for city/state/zip pattern near vendor name
+      const addrM=plainText.match(/(\d+\s+[A-Za-z0-9\s\.]+(?:St|Ave|Blvd|Dr|Rd|Way|Ln|Suite|Ste)\.?\s*[\w\s,]+\s+[A-Z]{2}\s+\d{5})/i);
+      // Try to extract phone
+      const phoneM=plainText.match(/(?:Phone|Tel|Ph)[:\s]*([\(\d\)][0-9\s\-\.\(\)]{7,15})/i)||plainText.match(/(\(\d{3}\)\s*\d{3}[-\s]\d{4})/);
+      // Try to extract email
+      const emailM=plainText.match(/([a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,})/);
+
+      if(guessedVendor) document.getElementById('vendorName').value=guessedVendor;
+      if(addrM) document.getElementById('vendorAddr').value=addrM[1].replace(/\s+/g,' ').trim();
+      const contactParts=[emailM?emailM[1]:'', phoneM?phoneM[1].trim():''].filter(Boolean);
+      if(contactParts.length) document.getElementById('vendorContact').value=contactParts.join('  |  ');
+    }
+
+    // Delivery & Tax
+    // Softchoice multi-group quotes use a stacked layout where the three labels
+    //   "SUBTOTAL / DELIVERY: Ground - 3 to 5 days / Local Tax"
+    // are rendered first, then the three amounts in order (subtotal, delivery, tax).
+    // When a Billing Schedule is also present, single-amount regexes match the
+    // wrong "Local Tax" (the per-year one). Try the 3-amount pattern first.
+    const stackedM=plainText.match(/SUBTOTAL\s+DELIVERY[^$]*Local Tax\s*\$?([\d,]+\.\d{2})\s+\$?([\d,]+\.\d{2})\s+\$?([\d,]+\.\d{2})/i);
+    if(stackedM){
+      // [1]=subtotal (recomputed by formula in the export), [2]=delivery, [3]=tax
+      document.getElementById('deliveryAmt').value=stackedM[2].replace(/,/g,'');
+      document.getElementById('taxAmt').value=stackedM[3].replace(/,/g,'');
+    } else {
+      // Inline-layout fallback (single-item Softchoice / SAS / generic)
+      // Delivery — grab the amount that appears with Ground/Delivery label
+      const delM=plainText.match(/\$([\d,]+\.\d{2})\s*Local Tax/i)||plainText.match(/Ground[^\$]*\$([\d,]+\.\d{2})/i);
+      if(delM) document.getElementById('deliveryAmt').value=delM[1].replace(/,/g,'');
+      // Tax — in inline Softchoice PDFs the text reads "Local Tax $38.97 $1,045.03" (delivery then tax)
+      // so we look for TWO consecutive amounts after "Local Tax" and take the second.
+      // Fall back to the single amount if only one is present (e.g. SAS quotes).
+      const taxM2=plainText.match(/Local Tax\s*\$?([\d,]+\.\d{2})\s+\$?([\d,]+\.\d{2})/i);
+      const taxM1=plainText.match(/Local Tax\s*\$?([\d,]+\.\d{2})/i);
+      if(taxM2) document.getElementById('taxAmt').value=taxM2[2].replace(/,/g,'');
+      else if(taxM1) document.getElementById('taxAmt').value=taxM1[1].replace(/,/g,'');
+    }
+
+    // ── SOFTCHOICE FORMAT (regex-based parser, robust against PDF.js positional-extraction quirks) ──
+    // The positional parser was selectively losing items when PDF.js chunked text differently
+    // across pages. This regex anchors on the well-defined per-row pattern in the joined plainText:
+    //   <10-digit item#> <SKU + description> <qty> <billing-freq> <start-date> <end-date> $<unit> $<ext>
+    // Negative lookahead `(?!\s+-)` skips Softchoice's repeating reference notes like
+    //   "2000400489 - Change in billing terms from annual upfront to 3YR commitment..."
+    if(/Softchoice/i.test(plainText)){
+      // The regex anchors on: <10-digit item#> <SKU + description> <qty> [<billing-freq> <middle>] $<unit> $<ext>
+      // The "middle" is captured as a flexible non-greedy glob so it tolerates:
+      //   - glued dates with no separator (e.g. "01-Jun202630-Apr2027" — common when narrow
+      //     date cells in the PDF cause PDF.js to emit the year-on-next-line items adjacently)
+      //   - extra columns like Usage Country / License Type appearing between End Date and Unit Price
+      //     (e.g. Microsoft EA quotes append "Subscription" between the end date and the unit price)
+      // The billing-freq + middle block is OPTIONAL so service items without recurring billing
+      // (e.g. one-time "ASSISTED IMPLEMENTATION" lines in Mimecast quotes) still match.
+      // The lookahead allows underscores and hyphens because Mimecast SKUs like "M_ADV-PRT-CG_10000_A"
+      // start with letter+underscore, which the older [A-Z0-9]{3,} wouldn't have caught.
+      // Dates are extracted from the middle as a second pass with a lenient date pattern.
+      const scRe=/(\d{10})(?!\s+-)(?=\s+[A-Z0-9_\-]{3,})\s+([\s\S]+?)\s+(\d+)(?:\s+(Annually|Monthly|One[-\s]?time|Annual|Upfront|Quarterly)\s+([\s\S]+?))?\s*\$([\d,]+\.\d{2})\s+\$([\d,]+\.\d{2})/g;
+
+      // Split "SKU + description" into separate fields. SKU is the first 1-3 short uppercase/code-like
+      // tokens; rest is description. Examples:
+      //   "CFQ7TTC0LH0J :0001 EXCHANGE..."        → sku="CFQ7TTC0LH0J :0001", desc="EXCHANGE..."
+      //   "PEY-00002 GitHub Enterprise..."        → sku="PEY-00002", desc="GitHub Enterprise..."
+      //   "M_ADV-PRT CG_10000_A ADVANCED..."      → sku="M_ADV-PRT CG_10000_A", desc="ADVANCED..."
+      //   "SUBSCRIPTION"                           → sku="", desc="SUBSCRIPTION" (no Mfg SKU column)
+      function splitSkuDesc(combinedText){
+        // Strip PDF.js wrap-artifact control chars (\x00-\x1F) before tokenizing
+        const cleaned=combinedText.replace(/[\x00-\x1F]/g,'');
+        const tokens=cleaned.split(/\s+/).filter(Boolean);
+        if(tokens.length===0) return {sku:'', desc:''};
+        // A SKU base looks code-like: contains a digit, colon, underscore, OR hyphen.
+        // Pure-letter tokens like "SUBSCRIPTION" or "LICENSE" are description, not SKUs.
+        const looksLikeSkuBase=/[\d:_\-]/.test(tokens[0]);
+        if(!looksLikeSkuBase) return {sku:'', desc:tokens.join(' ')};
+        let skuEnd=1;
+        for(let i=1; i<Math.min(tokens.length, 3); i++){
+          const t=tokens[i];
+          // SKU suffix patterns:
+          //  (a) contains a colon (e.g. ":0001", "8R:0002", "C:0001")
+          //  (b) short (<=5 chars), has digits, all uppercase/digit (e.g. "002Q", "0004")
+          //  (c) contains an underscore or hyphen and is all uppercase/digit/underscore/hyphen
+          //      (e.g. SKU continuations split by PDF wrap: "CG_10000_A", "T1_11_A", "AST_1_OO")
+          const isSuffix=t.includes(':')
+                       ||(t.length<=5 && /\d/.test(t) && /^[A-Z0-9]+$/.test(t))
+                       ||(/[_\-]/.test(t) && /^[A-Z0-9_\-]+$/.test(t));
+          if(!isSuffix) break;
+          skuEnd=i+1;
+        }
+        let desc=tokens.slice(skuEnd).join(' ');
+        // Clean any embedded page markers / repeated table headers / group section noise
+        desc=desc.replace(/Page\s+\d+\s+of\s+\d+/gi,'')
+                 .replace(/Item\s*#\s+Mfg\s+Sku\s*#\s+Description[\s\S]*?Extended\s*Price/gi,'')
+                 .replace(/Group\s+[A-Z]:\s+CSP\s+Licenses[\s\S]*?BUDGETARY[^A-Za-z]*/gi,'')
+                 .replace(/GROUP\s+TOTAL\s+\$[\d,]+\.\d{2}/gi,'')
+                 .replace(/\s+/g,' ').trim();
+        return {sku:tokens.slice(0,skuEnd).join(' '), desc};
+      }
+
+      const scLines=[];
+      let scM;
+      // Normalize date strings back to canonical "DD-Mon-YYYY". The "[^\\d]{0,4}" between
+      // month and year tolerates anything PDF.js might insert there: a regular hyphen,
+      // a whitespace, a wrap artifact like "- ", or even control characters like \x02
+      // that some narrow-cell PDF rendering emits (e.g. GitHub-on-SCE Microsoft EA quotes).
+      const normDate=s=>{
+        const m=(s||'').match(/(\d{1,2})-([A-Za-z]{3})[^\d]{0,4}(\d{4})/);
+        return m?`${m[1]}-${m[2]}-${m[3]}`:(s||'');
+      };
+      // Lenient date pattern for the second-pass extraction from the "middle" capture.
+      const dateInMiddleRe=/\d{1,2}-[A-Za-z]{3}[^\d]{0,4}\d{4}/g;
+      while((scM=scRe.exec(plainText))!==null){
+        const split=splitSkuDesc(scM[2]);
+        // Pull start/end dates out of the middle (capture #5). Anything else there
+        // — Usage Country code, License Type word, etc. — is intentionally discarded.
+        const dates=(scM[5]||'').match(dateInMiddleRe)||[];
+        scLines.push({
+          itemNum: scM[1],
+          sku: split.sku,
+          desc: split.desc,
+          qty: scM[3],
+          billingFreq: scM[4]||'',
+          startDate: dates[0]?normDate(dates[0]):'',
+          endDate: dates[1]?normDate(dates[1]):'',
+          price: scM[6].replace(/,/g,'')
+        });
+      }
+
+      if(scLines.length>0){
+        document.getElementById('lineItems').innerHTML='';
+        lineCount=0;
+        scLines.forEach(l=>addLine(l));
+        showStatus('ok','Softchoice quote imported \u2014 '+scLines.length+' line item'+(scLines.length!==1?'s':'')+' found. Review and adjust as needed.');
+        recalc();
+        return;
+      }
+      // Fall through to positional parser if regex found nothing
+    }
+
+    // Group items by y-position WITHIN each page (cross-page Y collisions would smash items together)
+    function groupByRow(items,tolerance=4){
+      const rows=[];
+      const sorted=[...items].sort((a,b)=>(a.page-b.page)||(a.y-b.y)||(a.x-b.x));
+      for(const item of sorted){
+        const existing=rows.find(r=>r.page===item.page&&Math.abs(r.y-item.y)<=tolerance);
+        if(existing){existing.items.push(item);existing.items.sort((a,b)=>a.x-b.x);}
+        else rows.push({y:item.y,page:item.page,items:[item]});
+      }
+      return rows.sort((a,b)=>(a.page-b.page)||(a.y-b.y));
+    }
+
+    const rows=groupByRow(allItems,5);
+
+    let headerRowIdx=-1;
+    for(let i=0;i<rows.length;i++){
+      const rowText=rows[i].items.map(x=>x.str).join(' ');
+      if(/Item\s*#/i.test(rowText)&&/Description/i.test(rowText)){headerRowIdx=i;break;}
+    }
+
+    const lines=[];
+
+    if(headerRowIdx>=0){
+      const hrow=rows[headerRowIdx];
+      const skuCol=hrow.items.find(i=>/Mfg|SKU/i.test(i.str));
+      const qtyCol=hrow.items.find(i=>/^Qty$/i.test(i.str.trim()));
+      const billingCol=hrow.items.find(i=>/Billing/i.test(i.str));
+      const startCol=hrow.items.find(i=>/Start/i.test(i.str));
+      const endCol=hrow.items.find(i=>/End\s*Date/i.test(i.str));
+      const priceCol=hrow.items.find(i=>/Unit\s*Price/i.test(i.str));
+      const extCol=hrow.items.find(i=>/Extended/i.test(i.str));
+      const dateRe=/^\d{1,2}[-\/][A-Za-z]{3}[-\/]\d{4}$|^\d{4}[-\/]\d{2}[-\/]\d{2}$/;
+
+      let currentItem=null;
+      for(let i=headerRowIdx+1;i<rows.length;i++){
+        const row=rows[i];
+        const rowText=row.items.map(x=>x.str).join(' ').trim();
+        // Stop at the final totals OR at the billing schedule section (which has its own rows that look like items but aren't)
+        if(/SUBTOTAL|Billing Schedule|Subtotal of Group/i.test(rowText)) break;
+        if(rowText.length<3) continue;
+        // Skip footer text (signature block, terms, etc.)
+        if(/Lease|payment|pricing|subject|terms|signature|name|title|^date$|PO#/i.test(rowText)&&!/\d{7,}/.test(rowText)) continue;
+        // Skip Softchoice multi-group structural rows: group section headers, group subtotals,
+        // page-of-page markers, repeated table headers on subsequent pages, and the standard NCE/budgetary callouts.
+        if(/^\s*Group\s+[A-Z]:/i.test(rowText)) continue;
+        if(/^\s*GROUP\s+TOTAL\b/i.test(rowText)) continue;
+        if(/^\s*Page\s+\d+\s+of\s+\d+\s*$/i.test(rowText)) continue;
+        if(/Item\s*#.*Mfg.*Description/i.test(rowText)) continue;
+        if(/NCE\s+Auto-Renewal|Annual\s+Renewal\s+Cost|Month-to-Month\s+Cost|BUDGETARY/i.test(rowText)) continue;
+        // Skip Softchoice change-in-billing footnotes (e.g. "- Change in billing terms...", "Annually billed $X...", "MTM SKU prone...")
+        if(/Change in billing terms|MTM SKU prone|Annually billed|billed for a duration/i.test(rowText)) continue;
+
+        const firstItem=row.items[0];
+        // A "new item" row needs both a 7-10 digit item# AND a price-like value on the same row,
+        // so that bare reference numbers (e.g. the recurring "2000400489" cross-reference in Softchoice quotes)
+        // don't get mistaken for line items.
+        const hasPrice=row.items.some(i=>/^\$[\d,]+\.\d{2}$/.test(i.str.trim()));
+        const isNewItem=/^\d{7,10}$/.test(firstItem?.str?.trim())&&hasPrice;
+
+        if(isNewItem){
+          if(currentItem) lines.push(currentItem);
+          const itemNum=firstItem.str.trim();
+          let sku='',desc='',qty='',price='',billingFreq='',startDate='',endDate='';
+
+          for(const it of row.items){
+            const x=it.x; const s=it.str.trim();
+            if(!s||s===itemNum) continue;
+            if(skuCol&&Math.abs(x-skuCol.x)<80&&!/^\d+$/.test(s)&&s.length>2&&s.length<20) sku=s;
+            else if(extCol&&x>=(extCol.x-20)) {}
+            else if(priceCol&&x>=(priceCol.x-20)&&x<(extCol?extCol.x-20:9999)) price=s.replace(/[$,]/g,'');
+            else if(qtyCol&&Math.abs(x-qtyCol.x)<60&&/^\d+$/.test(s)) qty=s;
+            else if(billingCol&&Math.abs(x-billingCol.x)<60&&/^(Annually|Monthly|One-?time|Annual)/i.test(s)) billingFreq=s;
+            else if(startCol&&Math.abs(x-startCol.x)<60&&dateRe.test(s)) startDate=s;
+            else if(endCol&&Math.abs(x-endCol.x)<60&&dateRe.test(s)) endDate=s;
+            else if(!billingFreq&&/^(Annually|Monthly|One-?time|Annual)$/i.test(s)) billingFreq=s;
+          }
+          const descItems=row.items.filter(it=>{
+            const x=it.x; const s=it.str.trim();
+            if(!s||s===itemNum||s===sku||s===qty||s===price) return false;
+            if(/^\$[\d,]+/.test(s)||/^[\d,]+\.\d{2}$/.test(s)) return false;
+            if(/^(Annually|Monthly|One-?time|Annual)$/i.test(s)) return false;
+            if(dateRe.test(s)) return false;
+            const afterSKU=skuCol?x>(skuCol.x+40):x>100;
+            const beforeQty=startCol?x<(startCol.x-10):qtyCol?x<(qtyCol.x+20):true;
+            return afterSKU&&beforeQty;
+          });
+          desc=descItems.map(i=>i.str).join(' ').trim();
+          currentItem={itemNum,sku,desc,qty,price,billingFreq,startDate,endDate};
+        } else if(currentItem){
+          const contText=row.items.filter(it=>{
+            const s=it.str.trim();
+            if(!s) return false;
+            if(/^\$[\d,]+/.test(s)||/^[\d,]+\.\d{2}$/.test(s)) return false;
+            if(/^(Annually|Monthly|One-?time|Annual|Ground|DELIVERY|Estimated)/i.test(s)) return false;
+            if(dateRe.test(s)) return false;
+            if(/\d{7,}/.test(s)) return false;
+            return true;
+          }).map(i=>i.str).join(' ').trim();
+          if(contText) currentItem.desc+=' '+contText;
+        }
+      }
+      if(currentItem) lines.push(currentItem);
+    }
+
+    // ── GENERIC FALLBACK — runs when positional parser finds nothing ──
+    // Tries multiple strategies to extract line items from any quote format
+    if(lines.length===0){
+
+      // Strategy 1: Softchoice-style 7-10 digit item numbers
+      const re1=/(\d{7,10})\s+([A-Z0-9\/\-\.]+)\s+([\w][\s\S]*?)\s+(\d{1,4})\s+(?:Annually\s+[\d\-A-Za-z]+\s+[\d\-A-Za-z]+\s+)?\$([\d,]+\.?\d*)\s+\$([\d,]+\.?\d*)/g;
+      let m1;
+      while((m1=re1.exec(plainText))!==null){
+        lines.push({itemNum:m1[1],sku:m1[2],desc:m1[3].replace(/\s+/g,' ').trim(),
+          qty:m1[4],price:m1[5].replace(/,/g,''),billingFreq:'',startDate:'',endDate:''});
+      }
+
+      // Strategy 2: Generic table rows — description + qty + price pattern
+      // Matches rows like: "Product Name   1   $99.00   $99.00"
+      if(lines.length===0){
+        const re2=/([A-Za-z][A-Za-z0-9\s\-\/\(\)\.\+,]{5,60}?)\s{2,}(\d{1,4})\s+\$?([\d,]+\.\d{2})\s+\$?([\d,]+\.\d{2})/g;
+        let m2;
+        while((m2=re2.exec(plainText))!==null){
+          const desc=m2[1].trim();
+          // Skip header rows and totals
+          if(/description|item|product|subtotal|total|tax|delivery/i.test(desc)) continue;
+          if(desc.length<4) continue;
+          lines.push({itemNum:'',sku:'',desc,qty:m2[2],
+            price:m2[3].replace(/,/g,''),billingFreq:'',startDate:'',endDate:''});
+        }
+      }
+
+      // Strategy 3: Positional table detection using x/y coordinates
+      // Find rows that have a dollar amount and nearby text
+      if(lines.length===0){
+        const groupByRow2=(items,tol=6)=>{
+          const rowMap=[];
+          items.forEach(it=>{
+            const existing=rowMap.find(r=>Math.abs(r.y-it.y)<=tol);
+            if(existing) existing.items.push(it);
+            else rowMap.push({y:it.y,items:[it]});
+          });
+          return rowMap.sort((a,b)=>a.y-b.y);
+        };
+        const allRows2=groupByRow2(allItems);
+        // Find rows containing a dollar amount pattern
+        const moneyRe=/\$[\d,]+\.\d{2}|[\d,]+\.\d{2}/;
+        const candidateRows=allRows2.filter(r=>{
+          const txt=r.items.map(i=>i.str).join(' ');
+          return moneyRe.test(txt)&&txt.length>10&&!/subtotal|total|tax|delivery|shipping/i.test(txt);
+        });
+        candidateRows.forEach(row=>{
+          const txt=row.items.map(i=>i.str).join(' ');
+          // Extract price — last dollar amount in the row
+          const prices=[...txt.matchAll(/\$?([\d,]+\.\d{2})/g)].map(m=>m[1].replace(/,/g,''));
+          if(prices.length<1) return;
+          const extPrice=prices[prices.length-1];
+          const unitPrice=prices.length>=2?prices[prices.length-2]:extPrice;
+          // Extract qty — number before the price
+          const qtyM=txt.match(/\b(\d{1,4})\b(?=\s+\$?[\d,]+\.\d{2})/);
+          const qty=qtyM?qtyM[1]:'1';
+          // Description — everything before the qty/price
+          const descEnd=qtyM?txt.indexOf(qtyM[0]):txt.lastIndexOf(unitPrice);
+          const desc=txt.slice(0,descEnd).replace(/\$?[\d,]+\.\d{2}/g,'').trim().replace(/\s+/g,' ');
+          if(desc.length>4){
+            lines.push({itemNum:'',sku:'',desc,qty,price:unitPrice,
+              billingFreq:'',startDate:'',endDate:''});
+          }
+        });
+      }
+    }
+
+    // ── TOTALS: generic extraction for unknown vendors ──
+    if(!document.getElementById('deliveryAmt').value||document.getElementById('deliveryAmt').value==='0'){
+      // Try shipping/freight patterns
+      const shipM=plainText.match(/(?:Shipping|Freight|Delivery)[^\$\d]*\$?([\d,]+\.\d{2})/i);
+      if(shipM) document.getElementById('deliveryAmt').value=shipM[1].replace(/,/g,'');
+    }
+    if(!document.getElementById('taxAmt').value||document.getElementById('taxAmt').value==='0'){
+      // Try tax patterns not already caught by Softchoice-specific logic
+      const taxGenM=plainText.match(/(?:Tax|GST|VAT|HST)[^\$\d]*\$?([\d,]+\.\d{2})/i);
+      if(taxGenM) document.getElementById('taxAmt').value=taxGenM[1].replace(/,/g,'');
+    }
+
+    if(lines.length>0){
+      document.getElementById('lineItems').innerHTML='';
+      lineCount=0;
+      lines.forEach(l=>addLine(l));
+      const knownMsg='Imported '+lines.length+' line item'+(lines.length!==1?'s':'')+' from PDF. Review and adjust as needed.';
+      const unknownMsg='Unknown vendor — imported '+lines.length+' line item'+(lines.length!==1?'s':'')+' using generic parser. Please verify all fields before exporting.';
+      showStatus('ok', isKnownVendor?knownMsg:unknownMsg);
+    } else {
+      showStatus('err','Could not parse line items — please enter them manually.');
+      if(!document.querySelector('.line-item')) addLine();
+    }
+    recalc();
+  }catch(e){
+    showStatus('err','Error reading PDF: '+e.message);
+    console.error(e);
+  }
+}
+
+function showStatus(type,msg){statusEl.className='parse-status '+type;statusEl.textContent=msg;}
+
+/* ── Line items ── */
+function addLine(item){
+  lineCount++;
+  const id=lineCount;
+  const div=document.createElement('div');
+  div.className='line-item';
+  div.id='line-'+id;
+  div.innerHTML=`
+    <button class="remove-btn" onclick="removeLine(${id})">✕</button>
+    <div class="li-grid">
+      <input type="text" placeholder="Item# / SKU" id="sku-${id}" value="${((item?.itemNum||'')+(item?.sku?' '+item.sku:'')).replace(/"/g,'&quot;')}" />
+      <input type="text" placeholder="Description" id="desc-${id}" value="${(item?.desc||'').replace(/"/g,'&quot;')}" />
+      <input type="number" placeholder="0" min="0" id="qty-${id}" value="${item?.qty||1}" oninput="recalc()" />
+      <input type="text" placeholder="Annually" id="freq-${id}" value="${item?.billingFreq||''}" style="font-size:12px" />
+      <input type="text" placeholder="Start Date" id="start-${id}" value="${item?.startDate||''}" style="font-size:12px" />
+      <input type="text" placeholder="End Date" id="end-${id}" value="${item?.endDate||''}" style="font-size:12px" />
+      <input type="number" placeholder="0.00" min="0" step="0.01" id="price-${id}" value="${item?.price||''}" oninput="recalc()" />
+      <div class="ext-display" id="ext-${id}">—</div>
+    </div>`;
+  document.getElementById('lineItems').appendChild(div);
+  // Persist Sonar-specific fields as data-* attributes when present (carried from PDF parser)
+  if(item&&item.sonarPricePerLine!=null){
+    div.dataset.sonarQty=item.sonarQty!=null?item.sonarQty:1;
+    div.dataset.sonarListPrice=item.sonarListPrice!=null?item.sonarListPrice:'';
+    div.dataset.sonarVolDiscount=item.sonarVolDiscount!=null?item.sonarVolDiscount:'';
+    div.dataset.sonarYearlyUnit=item.sonarYearlyUnit!=null?item.sonarYearlyUnit:'';
+    div.dataset.sonarDiscPct=item.sonarDiscPct!=null?item.sonarDiscPct:0;
+    div.dataset.sonarPricePerLine=item.sonarPricePerLine;
+  }
+  recalc();
+}
+
+function removeLine(id){const el=document.getElementById('line-'+id);if(el)el.remove();recalc();}
+
+function fmt(n){return '$'+Number(n||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});}
+
+function recalc(){
+  let sub=0;
+  document.querySelectorAll('.line-item').forEach(el=>{
+    const id=el.id.replace('line-','');
+    const q=parseFloat(document.getElementById('qty-'+id)?.value)||0;
+    const p=parseFloat(document.getElementById('price-'+id)?.value)||0;
+    const ext=q*p; sub+=ext;
+    const extEl=document.getElementById('ext-'+id);
+    if(extEl) extEl.textContent=ext>0?fmt(ext):'—';
+  });
+  const tax=parseFloat(document.getElementById('taxAmt').value)||0;
+  const del=parseFloat(document.getElementById('deliveryAmt').value)||0;
+  document.getElementById('subtotal').textContent=fmt(sub);
+  document.getElementById('grandTotal').textContent=fmt(sub+tax+del);
+}
+
+/* ── Export CSV ── */
+async function exportXLSX(){
+  if(typeof ExcelJS==='undefined'){
+    showToast('ExcelJS not ready — wait a moment and try again');
+    return;
+  }
+
+  const po=updateBadge();
+  const d=document.getElementById('poDate').value;
+  const poName=document.getElementById('poName').value.trim()||'PO';
+  const ticket=document.getElementById('ticketNum').value.trim();
+  const vendor=document.getElementById('vendorName').value.trim();
+  const vContact=document.getElementById('vendorContact').value.trim();
+  const vAddr=document.getElementById('vendorAddr').value.trim();
+  const qNum=document.getElementById('quoteNum').value.trim();
+  const deptNum=document.getElementById('deptNum').value.trim();
+  const deptName=document.getElementById('deptName').value.trim();
+  const useCase=document.getElementById('useCase').value.trim();
+  const tax=parseFloat(document.getElementById('taxAmt').value)||0;
+  const del=parseFloat(document.getElementById('deliveryAmt').value)||0;
+
+  const lineData=[];
+  document.querySelectorAll('.line-item').forEach(el=>{
+    const id=el.id.replace('line-','');
+    const qty=parseFloat(document.getElementById('qty-'+id)?.value)||0;
+    const price=parseFloat(document.getElementById('price-'+id)?.value)||0;
+    // Helper: parse a data-attribute number, returning null for empty/missing values
+    const dnum=key=>{
+      const v=el.dataset[key];
+      if(v===undefined||v==='') return null;
+      const n=parseFloat(v);
+      return Number.isNaN(n)?null:n;
+    };
+    lineData.push({sku:document.getElementById('sku-'+id)?.value||'',
+      desc:document.getElementById('desc-'+id)?.value||'',
+      billingFreq:document.getElementById('freq-'+id)?.value||'',
+      startDate:document.getElementById('start-'+id)?.value||'',
+      endDate:document.getElementById('end-'+id)?.value||'',
+      qty,price,ext:qty*price,
+      sonarQty:dnum('sonarQty'),
+      sonarListPrice:dnum('sonarListPrice'),
+      sonarVolDiscount:dnum('sonarVolDiscount'),
+      sonarYearlyUnit:dnum('sonarYearlyUnit'),
+      sonarDiscPct:dnum('sonarDiscPct'),
+      sonarPricePerLine:dnum('sonarPricePerLine')});
+  });
+
+  // Vendor-aware flags — set by PDF parser
+  const isSmartsheet=vendorType==='smartsheet';
+  const isSonar=vendorType==='sonar';
+  // Switch to billing layout when any line item has freq/start/end dates (Softchoice subscription quotes)
+  // Sonar items also have start/end dates, but use their own dedicated layout — exclude here.
+  const hasBilling=!isSmartsheet&&!isSonar&&lineData.some(l=>l.billingFreq||l.startDate||l.endDate);
+
+  // Dynamic row numbers (1-based)
+  // For Sonar (software subscriptions — no shipping), suppress the Delivery row entirely:
+  //   3 totals rows (SUBTOTAL | Local Tax | TOTAL) instead of 4. RT and RTOT shift up by 1.
+  const R1=19, RL=R1+lineData.length-1;
+  const RS=RL+1;
+  const RD=isSonar?null:RL+2;
+  const RT=RL+(isSonar?2:3);
+  const RTOT=RL+(isSonar?3:4);
+  const RSH=RTOT+2, RN=RTOT+3, RSIG=RTOT+4;
+
+  const wb=new ExcelJS.Workbook();
+  wb.creator='Corrohealth IT';
+  const ws=wb.addWorksheet('Sheet1');
+
+  // Embed CorroHealth logo (exact position from template)
+  const logoId=wb.addImage({base64:LOGO_B64,extension:'jpeg'});
+  ws.addImage(logoId,{
+    tl:{nativeCol:0,nativeColOff:47625,nativeRow:0,nativeRowOff:95250},
+    br:{nativeCol:5,nativeColOff:19050,nativeRow:3,nativeRowOff:428625},
+    editAs:'oneCell'
+  });
+
+  // Column widths
+  // Standard layout: F is part of the D:I description merge, so F's width is mostly cosmetic.
+  // Sonar layout: F stands alone as the End Date column and needs room for "26-Feb-2027" —
+  //   we reallocate ~5 char widths from D/I/K (which had slack) into F to prevent smushing.
+  //   Net total width stays close to the original so the page-fit setting still works.
+  if(isSonar){
+    ws.columns=[
+      {width:8.54},{width:7.73},{width:16.27},{width:10.82},{width:10.09},
+      {width:8.73},{width:7.0},{width:6.73},{width:11.18},
+      {width:11.0},{width:8.18},{width:13.82}
+    ];
+  } else {
+    ws.columns=[
+      {width:8.57},{width:7.71},{width:16.29},{width:12.86},{width:11.14},
+      {width:3.71},{width:7.0},{width:6.71},{width:13.0},
+      {width:9.57},{width:11.5},{width:13.86}
+    ];
+  }
+
+  // Style helpers
+  const T={style:'thin',color:{argb:'FF000000'}};
+  const M={style:'medium',color:{argb:'FF000000'}};
+  const blackFill={type:'pattern',pattern:'solid',fgColor:{argb:'FF000000'}};
+  const grayFill ={type:'pattern',pattern:'solid',fgColor:{argb:'FFD9D9D9'}};
+  const money='$#,##0.00';
+
+  function C(r,c){return ws.getCell(r,c);}
+  function sv(r,c,val){
+    const cell=C(r,c);
+    if(val!==null&&val!==undefined&&typeof val==='object'&&val.f)
+      cell.value={formula:val.f};
+    else if(typeof val==='number') cell.value=val;
+    else cell.value=String(val!=null?val:'');
+    return cell;
+  }
+  function fnt(bold,color){return{name:'Calibri',size:10,bold:!!bold,color:{argb:color||'FF000000'}};}
+  function bdr(t,b,l,r){const o={};if(t)o.top=t;if(b)o.bottom=b;if(l)o.left=l;if(r)o.right=r;return o;}
+  function aln(h,v,wrap){const o={};if(h)o.horizontal=h;if(v)o.vertical=v;if(wrap)o.wrapText=true;return o;}
+
+  // Row heights (exact from template)
+  const rh={1:18,2:15.6,3:15.75,4:43.5,5:29.1,6:33.0,
+            8:15.75,9:0.95,10:15.75,11:17.1,
+            13:15.75,14:15.75,15:15.6,16:15.75,17:15.75,18:24};
+  for(let r=R1;r<=RL;r++) rh[r]=41.45;
+  rh[RN]=27.95; rh[RSIG]=39.6;
+  Object.entries(rh).forEach(([r,h])=>ws.getRow(Number(r)).height=h);
+
+  // Row 1: Title
+  sv(1,12,'Purchase Order');
+  C(1,12).font={name:'Calibri',size:14,bold:true};
+  C(1,12).alignment=aln('right');
+
+  // Rows 2-4: Ship To / Bill To
+  sv(2,7,'Ship to:      Corrohealth, Inc.   6509 Windcrest Dr, Ste 165 Plano, TX. 75024 United States (214) 587-5809');
+  C(2,7).alignment=aln(null,'top',true);
+  sv(2,10,'Bill to:     Corrohealth, INC.                     accounts.payable@corrohealth.com       6509 Windcrest Dr Ste 165,                      Plano, Texas, 75024-3403,                       United States');
+  C(2,10).alignment=aln(null,'top',true);
+
+  // Row 5: Headers
+  sv(5,1,'Dept #'); C(5,1).font=fnt(true); C(5,1).border=bdr(T,T,T,T); C(5,1).alignment=aln('center','center',true);
+  sv(5,2,'Department Name'); C(5,2).font=fnt(true); C(5,2).border=bdr(T,T,T,T); C(5,2).alignment=aln('center','center',true);
+  C(5,3).border=bdr(T,T,null,T);
+  sv(5,4,'Request Amount'); C(5,4).font=fnt(true); C(5,4).border=bdr(T,T,T,T); C(5,4).alignment=aln('center','center',true);
+  sv(5,5,'This Section To Be Completed By Accounting');
+  C(5,5).font=fnt(true); C(5,5).fill=grayFill; C(5,5).border=bdr(T,T,T,T); C(5,5).alignment=aln('center','center',true);
+  sv(5,6,'Ticket ID Number');
+  C(5,6).font=fnt(true); C(5,6).fill=grayFill; C(5,6).border=bdr(T,T,T,T); C(5,6).alignment=aln('center','center',true);
+  [7,8,9].forEach(c=>{C(5,c).border=bdr(T,T,null,null);});
+  C(5,10).border=bdr(T,T,null,T);
+  sv(5,11,'Purchase Order Number');
+  C(5,11).font=fnt(true); C(5,11).fill=grayFill; C(5,11).border=bdr(T,T,T,T); C(5,11).alignment=aln('center','center',true);
+  C(5,12).border=bdr(T,T,null,T);
+
+  // Row 6: Values
+  sv(6,1,deptNum); C(6,1).border=bdr(T,T,T,T); C(6,1).alignment=aln('center','center');
+  sv(6,2,deptName); C(6,2).border=bdr(T,T,T,T); C(6,2).alignment=aln('center','center');
+  C(6,3).border=bdr(T,T,null,T);
+  sv(6,4,{f:`SUM(L${RTOT})`}); C(6,4).border=bdr(T,T,T,T); C(6,4).numFmt=money; C(6,4).alignment=aln('center','center');
+  C(6,5).border=bdr(null,T,T,T);
+  sv(6,6,ticket||''); C(6,6).fill=grayFill; C(6,6).border=bdr(T,T,T,T); C(6,6).alignment=aln('center','center');
+  [7,8,9].forEach(c=>{C(6,c).border=bdr(T,T,null,null);});
+  C(6,10).border=bdr(T,T,null,T);
+  sv(6,11,po); C(6,11).fill=grayFill; C(6,11).border=bdr(T,T,T,T); C(6,11).alignment=aln('center','center');
+  C(6,12).border=bdr(T,T,null,T);
+
+  // Row 7: bottom line of dept section
+  for(let c=1;c<=12;c++) C(7,c).border=bdr(T,null,null,null);
+
+  // Row 8: Business Use Case label
+  sv(8,1,'Business Use Case:').font=fnt(true);
+
+  // Rows 10-11: Use case box
+  sv(10,1,useCase); C(10,1).alignment=aln(null,'top',true);
+  C(10,1).border=bdr(T,T,T,T);
+  for(let c=2;c<=11;c++) C(10,c).border=bdr(T,null,null,null);
+  C(10,12).border=bdr(T,null,null,T);
+  C(11,1).border=bdr(null,T,T,null);
+  for(let c=2;c<=11;c++) C(11,c).border=bdr(null,T,null,null);
+  C(11,12).border=bdr(null,T,null,T);
+  for(let c=1;c<=12;c++) C(12,c).border=bdr(null,T,null,null);
+
+  // Row 12: "Vendor:" label (sits above vendor name, already has bottom border from separator loop)
+  sv(12,1,'Vendor:');
+
+  // Rows 13-15 (or 13-17 for Sonar): Vendor info with bottom separators
+  if(isSonar){
+    sv(13,1,vendor); sv(13,6,qNum?'Quote-'+qNum:'');
+    // Sonar addresses split at " Geneva" (P.O. Box + postal code | city + country)
+    const genevaIdx=vAddr.search(/\s+Geneva/i);
+    if(genevaIdx>0){
+      sv(14,1,vAddr.slice(0,genevaIdx).trim());
+      sv(15,1,vAddr.slice(genevaIdx).trim());
+    } else {
+      sv(14,1,vAddr);
+    }
+    // Phone & email parsed out of the contact field (default: "contact@sonarsource.com | +41 22 510 2424")
+    const snEmailM=vContact.match(/[\w.\-]+@[\w.\-]+/);
+    const snPhoneM=vContact.match(/\+?\d[\d\s\-()]{6,}/);
+    if(snPhoneM) sv(16,1,'Phone '+snPhoneM[0].trim());
+    if(snEmailM) sv(17,1,'Email: '+snEmailM[0]);
+    [13,14,15,16,17].forEach(r=>{for(let c=1;c<=12;c++) C(r,c).border=bdr(null,T,null,null);});
+  } else {
+    sv(13,1,vendor); sv(13,6,qNum?'Quote-'+qNum:'');
+    sv(14,1,vAddr); sv(15,1,vContact);
+    [13,14,15].forEach(r=>{for(let c=1;c<=12;c++) C(r,c).border=bdr(null,T,null,null);});
+  }
+
+  // Row 18: Line item header — BLACK fill, white bold
+  for(let c=1;c<=12;c++){
+    C(18,c).fill=blackFill; C(18,c).font=fnt(true,'FFFFFFFF');
+    C(18,c).border=bdr(T,T,T,T); C(18,c).alignment=aln('center','center',true);
+  }
+  if(isSmartsheet){
+    sv(18,1,'Product');
+    sv(18,4,'Subscription Term');
+    sv(18,10,'Qty');
+    sv(18,11,'Annual Unit Price');
+    sv(18,12,'Extended Price');
+  } else if(isSonar){
+    // Sonar columns: A=SKU | B:C=Product | D=QTY | E=Start | F=End | G:H=List | I=VolDisc | J=YearlyUnit | K=Disc% | L=PricePerLine
+    sv(18,1,'SKU');
+    sv(18,2,'Product');             // B:C merged
+    sv(18,4,'QTY');
+    sv(18,5,'Start Date');
+    sv(18,6,'End Date');
+    sv(18,7,'List Price');           // G:H merged
+    sv(18,9,'Volume Discount');
+    sv(18,10,'Yearly Unit Price');
+    sv(18,11,'Disc. (%)*');
+    sv(18,12,'Price Per Line');
+  } else if(hasBilling){
+    // Billing layout: A=Item#, C=SKU, D:E=Desc(bot=M), F:G=Billing Freq, H=Start, I=End, J=Qty, K=Price, L=Ext
+    sv(18,1,'Item#'); sv(18,3,'Mfg SKU #');
+    sv(18,4,'Desciption'); C(18,4).border=bdr(T,M,T,T);  // D: bottom=MEDIUM
+    C(18,5).border=bdr(T,M,null,T);                        // E: part of D:E merge
+    sv(18,6,'Billing Frequency');                           // F:G merged
+    sv(18,8,'Start Date'); sv(18,9,'End Date');
+    sv(18,10,'Qty'); sv(18,11,'Unit Price'); sv(18,12,'Extended Price');
+  } else {
+    sv(18,1,'Item#'); sv(18,3,'Mfg SKU #'); sv(18,4,'Desciption');
+    C(18,4).alignment=aln('left','center',true);
+    sv(18,10,'Qty'); sv(18,11,'Unit Price'); sv(18,12,'Extended Price');
+  }
+  if(!hasBilling&&!isSmartsheet&&!isSonar){
+    [5,6,7,8].forEach(c=>{C(18,c).border=bdr(T,T,null,null);});
+    C(18,9).border=bdr(T,T,null,null); // R=- compact: separation from J18 left border
+  } else if(hasBilling){
+    // G18 interior of F:G Billing Freq merge — no extra border needed (set above)
+    C(18,7).border=bdr(T,T,null,T); // G right edge of F:G merge
+  }
+
+  // Line items
+  lineData.forEach((l,i)=>{
+    const r=R1+i;
+    const isFirst=i===0, isLast=i===lineData.length-1;
+
+    // ── Sonar layout: A=SKU | B:C=Product | D=Qty | E=Start | F=End | G:H=List | I=VolDisc | J=YearlyUnit | K=Disc% | L=PricePerLine ──
+    if(isSonar){
+      for(let c=1;c<=12;c++){
+        C(r,c).border=bdr(isFirst?M:T,isLast?M:T,c===1?M:T,c===12?M:T);
+        C(r,c).alignment=aln('center','center',true);
+      }
+      sv(r,1,l.sku);
+      sv(r,2,l.desc); C(r,2).alignment=aln('center','center',true);
+      sv(r,4,l.sonarQty!=null?l.sonarQty:l.qty);
+      sv(r,5,l.startDate||'');
+      sv(r,6,l.endDate||'');
+      if(l.sonarListPrice!=null){ sv(r,7,l.sonarListPrice); C(r,7).numFmt=money; }
+      if(l.sonarVolDiscount!=null){ sv(r,9,l.sonarVolDiscount); C(r,9).numFmt=money; }
+      if(l.sonarYearlyUnit!=null){ sv(r,10,l.sonarYearlyUnit); C(r,10).numFmt=money; }
+      if(l.sonarDiscPct!=null) sv(r,11,l.sonarDiscPct);
+      const lineTotal=l.sonarPricePerLine!=null?l.sonarPricePerLine:(l.qty*l.price);
+      sv(r,12,lineTotal); C(r,12).numFmt=money;
+      return;
+    }
+
+    const parts=l.sku.split(/\s+/);
+    const itemNum=parts[0]||'', mfgSku=parts.slice(1).join(' ')||'';
+    if(hasBilling){
+      // Billing layout: A:B=itemNum, C=sku, D:E=desc, F:G=billingFreq, H=start, I=end, J=qty, K=price, L=ext
+      // All borders MEDIUM on all cells (no first/last distinction needed)
+      C(r,1).border=bdr(M,M,M,null);  // A: left edge of A:B
+      C(r,2).border=bdr(M,M,null,T);  // B: right of A:B = thin
+      C(r,3).border=bdr(M,M,M,M);     // C: all medium
+      C(r,4).border=bdr(M,M,null,null); // D: interior of D:E merge
+      C(r,5).border=bdr(M,M,null,null); // E: interior of D:E merge
+      C(r,6).border=bdr(M,M,M,null);  // F: left edge of F:G
+      C(r,7).border=bdr(M,M,null,M);  // G: right edge of F:G = medium
+      C(r,8).border=bdr(M,M,M,M);     // H: Start Date
+      C(r,9).border=bdr(M,M,M,M);     // I: End Date
+      C(r,10).border=bdr(M,M,M,M);    // J: Qty
+      C(r,11).border=bdr(M,M,M,M);    // K: Unit Price
+      C(r,12).border=bdr(M,M,M,M);    // L: Extended
+      for(let c=1;c<=12;c++) C(r,c).alignment=aln('center','center',true);
+    } else {
+      // Compact layout: desc=D:I, Qty=J
+      for(let c=1;c<=12;c++){
+        const topB=isFirst?M:T;
+        const botB=(isLast&&c<=9)?M:(isLast&&c>9)?null:T;
+        const leftB=c===1?M:c===3||c===10||c===11||c===12?T:null;
+        const rightB=c===12?M:c===2||c===3||c===9?T:c===1?T:null;
+        C(r,c).border=bdr(topB,botB,leftB,rightB);
+        C(r,c).alignment=aln('center','center',true);
+      }
+      [5,6,7,8].forEach(c=>{C(r,c).border=bdr(isFirst?M:T,isLast?M:T,null,null);});
+      C(r,9).border=bdr(isFirst?M:T,isLast?M:T,null,null); // R=- : separation comes from J left border
+    }
+    if(isSmartsheet){
+      sv(r,1,l.sku);
+    } else {
+      sv(r,1,itemNum); sv(r,3,mfgSku);
+    }
+    sv(r,4,l.desc);
+    if(hasBilling){
+      // F:G=billingFreq, H=startDate, I=endDate, J=qty, K=price, L=PRODUCT(J,K)
+      sv(r,6,l.billingFreq||''); C(r,6).alignment=aln('center','center');
+      sv(r,8,l.startDate||''); C(r,8).alignment=aln('center','center');
+      sv(r,9,l.endDate||''); C(r,9).alignment=aln('center','center');
+      sv(r,10,l.qty); C(r,10).alignment=aln('center','center');
+      sv(r,11,l.price); C(r,11).numFmt=money; C(r,11).alignment=aln('center','center');
+      sv(r,12,{f:`PRODUCT(J${r},K${r})`}); C(r,12).numFmt=money; C(r,12).alignment=aln('center','center');
+    } else {
+      sv(r,10,l.qty); C(r,10).alignment=aln('center','center');
+      sv(r,11,l.price); C(r,11).numFmt=money; C(r,11).alignment=aln('center','center');
+      sv(r,12,{f:`PRODUCT(J${r},K${r})`}); C(r,12).numFmt=money; C(r,12).alignment=aln('center','center');
+    }
+  });
+
+  // Totals section
+  sv(RS,6,'SUBTOTAL'); C(RS,6).font=fnt(true);
+  const subTop=hasBilling?null:T; // billing: last item B=M so no top needed on SUBTOTAL
+  for(let c=6;c<=12;c++) C(RS,c).border=bdr(subTop,null,c===6?T:null,c===12?T:null);
+  sv(RS,12,{f:`SUM(L${R1}:L${RL})`}); C(RS,12).numFmt=money;
+  // Delivery row: suppressed entirely for Sonar (software subscription — nothing to ship)
+  if(!isSonar){
+    sv(RD,6,isSmartsheet?'Prorated Charges':'Delivery:Ground-3 to 5 days');
+    C(RD,6).border=bdr(null,null,T,null); C(RD,12).border=bdr(null,null,null,T);
+    sv(RD,12,del); C(RD,12).numFmt=money;
+  }
+  sv(RT,6,'Local Tax');
+  C(RT,6).border=bdr(null,null,T,null); C(RT,12).border=bdr(null,null,null,T);
+  sv(RT,12,tax); C(RT,12).numFmt=money;
+  sv(RTOT,6,'TOTAL'); C(RTOT,6).font=fnt(true);
+  for(let c=6;c<=12;c++) C(RTOT,c).border=bdr(T,T,c===6?T:null,c===12?T:null);
+  sv(RTOT,12,{f:isSonar?`SUM(L${RS}+L${RT})`:`SUM(L${RS}+L${RD}+L${RT})`}); C(RTOT,12).numFmt=money;
+
+  // Signature header
+  sv(RSH,4,'IT Review:').font=fnt(true);
+  sv(RSH,7,'PO Reviewed by:').font=fnt(true);
+  sv(RSH,10,'PO Approved by:').font=fnt(true);
+
+  // Name + Signature rows — 4 sections: A:C | D:F | G:I | J:L (equal 3-col widths for the input boxes)
+  // Exact border weights:
+  //   A:C → name: top=M bot=T | sig: top=T bot=M  (left=M on col1 only)
+  //   D:F → both rows: top=M bot=M left=M on col4, right=M on col6 (all-medium box)
+  //   G:I → both rows: top=M bot=M left=M on col7, right=T on col9
+  //   J:L → both rows: top=M bot=M left=M on col10, right=T on col12
+
+  // Name row (RN)
+  for(let c=1;c<=3;c++)   C(RN,c).border=bdr(M,T,c===1?M:null,null);
+  for(let c=4;c<=6;c++)   C(RN,c).border=bdr(M,M,c===4?M:null,c===6?M:null);
+  for(let c=7;c<=9;c++)   C(RN,c).border=bdr(M,M,c===7?M:null,c===9?T:null);
+  for(let c=10;c<=12;c++) C(RN,c).border=bdr(M,M,c===10?M:null,c===12?T:null);
+
+  // Sig row (RSIG) — A:C flips top/bot; D-L stays all-medium
+  for(let c=1;c<=3;c++)   C(RSIG,c).border=bdr(T,M,c===1?M:null,null);
+  for(let c=4;c<=6;c++)   C(RSIG,c).border=bdr(M,M,c===4?M:null,c===6?M:null);
+  for(let c=7;c<=9;c++)   C(RSIG,c).border=bdr(M,M,c===7?M:null,c===9?T:null);
+  for(let c=10;c<=12;c++) C(RSIG,c).border=bdr(M,M,c===10?M:null,c===12?T:null);
+
+  sv(RN,1,'Name:'); sv(RSIG,1,'Signature:');
+
+  // Merged cells
+  ws.mergeCells('G2:I4'); ws.mergeCells('J2:L4');
+  ws.mergeCells('B5:C5'); ws.mergeCells('E5:E6');
+  ws.mergeCells('F5:J5'); ws.mergeCells('K5:L5');
+  ws.mergeCells('B6:C6'); ws.mergeCells('F6:J6'); ws.mergeCells('K6:L6');
+  ws.mergeCells('A9:L9'); ws.mergeCells('A10:L11');
+  ws.mergeCells('A13:D13'); ws.mergeCells('F13:L13');
+  ws.mergeCells('A14:D14'); ws.mergeCells('A15:D15');
+  ws.mergeCells('A16:D16'); ws.mergeCells('A17:D17');
+  if(isSonar){ ws.mergeCells('B18:C18'); ws.mergeCells('G18:H18'); }
+  else if(hasBilling){ ws.mergeCells('D18:E18'); ws.mergeCells('F18:G18'); }
+  else ws.mergeCells('D18:I18');
+  lineData.forEach((_,i)=>{
+    const r=R1+i;
+    if(isSonar){
+      ws.mergeCells(`B${r}:C${r}`);
+      ws.mergeCells(`G${r}:H${r}`);
+    } else {
+      ws.mergeCells(`A${r}:B${r}`);
+      if(hasBilling){ ws.mergeCells(`D${r}:E${r}`); ws.mergeCells(`F${r}:G${r}`); } else ws.mergeCells(`D${r}:I${r}`);
+    }
+  });
+  ws.mergeCells(`A${RN}:C${RN}`); ws.mergeCells(`D${RN}:F${RN}`);
+  ws.mergeCells(`G${RN}:I${RN}`); ws.mergeCells(`J${RN}:L${RN}`);
+  ws.mergeCells(`A${RSIG}:C${RSIG}`); ws.mergeCells(`D${RSIG}:F${RSIG}`);
+  ws.mergeCells(`G${RSIG}:I${RSIG}`); ws.mergeCells(`J${RSIG}:L${RSIG}`);
+
+  // Re-apply right borders on rightmost cell of each merged section after merge strips them
+  // D:F right = MEDIUM (col 6) | G:I right = THIN (col 9) | J:L right = THIN (col 12)
+  C(RN,6).border=bdr(M,M,null,M);   C(RSIG,6).border=bdr(M,M,null,M);
+  C(RN,9).border=bdr(M,M,null,T);   C(RSIG,9).border=bdr(M,M,null,T);
+  C(RN,12).border=bdr(M,M,null,T);  C(RSIG,12).border=bdr(M,M,null,T);
+
+  // Page setup
+  ws.pageSetup={fitToPage:true,fitToWidth:1,fitToHeight:1,orientation:'portrait',paperSize:1};
+  ws.pageMargins={left:0.5,right:0.5,top:0.75,bottom:0.75,header:0.3,footer:0.3};
+
+  // Remove gridlines
+  ws.views=[{showGridLines:false}];
+
+  // Download — filename uses PO Name / Description field
+  showToast('Building Excel file\u2026');
+  const buffer=await wb.xlsx.writeBuffer();
+  const blob=new Blob([buffer],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  const safeName=(poName||po).replace(/[^a-zA-Z0-9\-_\s]/g,'').replace(/\s+/g,'_');
+  a.download=safeName+'.xlsx';
+  a.href=url; a.click();
+  URL.revokeObjectURL(url);
+  showToast('Excel downloaded!');
+}
+
+
+function previewPO(){
+  const po=updateBadge();
+  const ticket=document.getElementById('ticketNum').value.trim();
+  const vendor=document.getElementById('vendorName').value;
+  const deptName=document.getElementById('deptName').value;
+  const grand=document.getElementById('grandTotal').textContent;
+  const useCase=document.getElementById('useCase').value;
+  const lineData=[];
+  document.querySelectorAll('.line-item').forEach(el=>{
+    const id=el.id.replace('line-','');
+    lineData.push(`- ${document.getElementById('desc-'+id)?.value} | Qty: ${document.getElementById('qty-'+id)?.value} @ $${document.getElementById('price-'+id)?.value}`);
+  });
+  let msg=`Please review this PO:\n\nPO Number: ${po}\nVendor: ${vendor}\nDept: ${deptName}\nTotal: ${grand}`;
+  if(ticket) msg+=`\nTicket ID: ${ticket}`;
+  if(useCase) msg+=`\nBusiness Use Case: ${useCase}`;
+  msg+=`\n\nLine items:\n${lineData.join('\n')}`;
+  msg+='\n\nDoes anything look missing or unusual?';
+  if(window.sendPrompt) sendPrompt(msg);
+  else alert('Preview:\n\n'+msg);
+}
+
+function clearAll(){
+  ['poName','vendorName','vendorContact','vendorAddr','quoteNum','quoteDate','useCase','ticketNum'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('deptNum').value='27';
+  document.getElementById('deptName').value='IT - Shared Services';
+  document.getElementById('taxAmt').value='0';
+  document.getElementById('deliveryAmt').value='0';
+  document.getElementById('poDate').value=today();
+  document.getElementById('lineItems').innerHTML='';
+  lineCount=0;
+  vendorType='standard';
+  statusEl.className='parse-status';
+  statusEl.textContent='';
+  fileInput.value='';
+  updateBadge();recalc();
+}
+
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+addLine();
+updateBadge();
+
+// ============================================================
+//  VERSION & UPDATE CHECK
+// ============================================================
+// Bump APP_VERSION and APP_VERSION_DATE whenever you ship a new build.
+const APP_VERSION = '4.8.0';
+const APP_VERSION_DATE = 'May 28, 2026';
+
+// To enable the "Check for Updates" button, host a small version manifest
+// somewhere reachable from a browser (a GitHub Gist, GitHub Pages, SharePoint
+// link with anonymous access, etc.) and paste the raw URL here. Manifest format:
+//
+//   {
+//     "version": "4.8.0",
+//     "date": "June 15, 2026",
+//     "downloadUrl": "https://your-host/po_builder.html",
+//     "changelog": "- Added Atlassian quote parser\n- Fixed Smartsheet date format"
+//   }
+//
+// If UPDATE_CHECK_URL is empty, the button just shows the current version and
+// the DOWNLOAD_URL (if set) so users know where to grab the latest file.
+const UPDATE_CHECK_URL = 'https://raw.githubusercontent.com/jusgitcan/IT-Tools-Hub/main/po-builder/version.json';
+const DOWNLOAD_URL     = 'https://jusgitcan.github.io/IT-Tools-Hub/po-builder/';
+
+document.getElementById('appVer').textContent  = APP_VERSION;
+document.getElementById('appDate').textContent = APP_VERSION_DATE;
+
+function cmpVer(a, b){
+  const pa = (a||'').split('.').map(n => parseInt(n)||0);
+  const pb = (b||'').split('.').map(n => parseInt(n)||0);
+  for (let i = 0; i < Math.max(pa.length, pb.length); i++){
+    const d = (pa[i]||0) - (pb[i]||0);
+    if (d) return d;
+  }
+  return 0;
+}
+
+function showUpdateMsg(html, cls){
+  const el = document.getElementById('updateMsg');
+  el.className = 'update-msg' + (cls ? ' ' + cls : '');
+  el.innerHTML = html;
+  el.hidden = false;
+}
+
+async function checkForUpdates(){
+  showUpdateMsg('Checking for updates…');
+
+  // No manifest URL configured — just show current version + download link if available
+  if (!UPDATE_CHECK_URL){
+    if (DOWNLOAD_URL){
+      showUpdateMsg(`You're running <strong>v${APP_VERSION}</strong> (${APP_VERSION_DATE}). Latest is always at <a href="${DOWNLOAD_URL}" target="_blank" rel="noopener">${DOWNLOAD_URL}</a>`);
+    } else {
+      showUpdateMsg(`You're running <strong>v${APP_VERSION}</strong> (${APP_VERSION_DATE}). Update checking isn't configured yet — contact Corrohealth IT for the latest version.`);
+    }
+    return;
+  }
+
+  try {
+    const resp = await fetch(UPDATE_CHECK_URL, { cache: 'no-cache' });
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    const m = await resp.json();
+    const latestVer  = (m.version || '').toString();
+    const latestDate = (m.date || '').toString();
+    const changelog  = (m.changelog || '').toString();
+    const dlUrl      = m.downloadUrl || DOWNLOAD_URL;
+
+    if (cmpVer(latestVer, APP_VERSION) > 0){
+      const cl = changelog
+        ? `<br><br><em>What's new:</em><br>${changelog.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/\n/g,'<br>')}`
+        : '';
+      const dl = dlUrl
+        ? `<br><br><a href="${dlUrl}" target="_blank" rel="noopener"><strong>Download v${latestVer}</strong></a>`
+        : '';
+      showUpdateMsg(`<strong>Update available!</strong> You're on v${APP_VERSION}; latest is v${latestVer}${latestDate ? ` (${latestDate})` : ''}.${cl}${dl}`, 'ok');
+    } else {
+      showUpdateMsg(`You're running the latest version (<strong>v${APP_VERSION}</strong>, ${APP_VERSION_DATE}).`, 'ok');
+    }
+  } catch (err){
+    const fb = DOWNLOAD_URL
+      ? `<br>Latest version is at: <a href="${DOWNLOAD_URL}" target="_blank" rel="noopener">${DOWNLOAD_URL}</a>`
+      : '';
+    showUpdateMsg(`Couldn't check for updates: ${err.message}.<br>You're currently running <strong>v${APP_VERSION}</strong>.${fb}`, 'err');
+  }
+}
+
+document.getElementById('updateBtn').addEventListener('click', checkForUpdates);
+</script>
+</body>
+</html>
