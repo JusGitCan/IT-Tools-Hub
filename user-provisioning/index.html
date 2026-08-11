@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>User Provisioning Wizard · CorroHealth Power Tools</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  /* Inherits the CorroHealth Tools Hub design tokens so this page matches the hub. */
+  :root {
+    --brand-purple: #512e6e;
+    --brand-magenta: #5e174d;
+    --brand-gold: #e7b524;
+    --grad-lime: #9ccb3b;
+    --grad-teal: #35b6b6;
+    --grad-purple: #5b2d86;
+  }
+  html[data-theme="dark"] {
+    --bg: #140d1e; --bg-glow: #1e1230; --surface: #1e1630; --surface-2: #251b3a;
+    --surface-hover: #2b2044; --border: #342747; --border-soft: #2a2040;
+    --text: #f3eefb; --text-muted: #a99cc0; --text-faint: #7d7196; --btn-face: #2a1f42;
+  }
+  html[data-theme="light"] {
+    --bg: #f6f3fa; --bg-glow: #efe8f6; --surface: #ffffff; --surface-2: #faf7fd;
+    --surface-hover: #f3eef9; --border: #e4dcef; --border-soft: #ece5f4;
+    --text: #241633; --text-muted: #6a5c80; --text-faint: #948aa6; --btn-face: #ffffff;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--text);
+    line-height: 1.5; -webkit-font-smoothing: antialiased; min-height: 100vh;
+    position: relative; overflow-x: hidden; transition: background .35s ease, color .35s ease;
+  }
+  .ambient {
+    position: fixed; top: -220px; left: 50%; transform: translateX(-50%);
+    width: 1100px; height: 700px; pointer-events: none; z-index: 0; opacity: .5;
+  }
+  html[data-theme="light"] .ambient { opacity: .35; }
+  .shell { position: relative; z-index: 1; max-width: 1180px; margin: 0 auto; padding: 0 28px; }
+
+  header { display: flex; align-items: center; justify-content: space-between; padding: 22px 0 26px; }
+  .brand { display: flex; align-items: center; gap: 13px; }
+  .brand .mark { width: 46px; height: 40px; flex-shrink: 0; }
+  .brand-text { display: flex; align-items: baseline; gap: 10px; }
+  .brand-text .name { font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 20px; letter-spacing: -0.01em; color: var(--text); }
+  .brand-text .tag {
+    font-family: 'JetBrains Mono', monospace; font-size: 10.5px; letter-spacing: .06em;
+    text-transform: uppercase; color: var(--text-muted); border: 1px solid var(--border);
+    padding: 3px 8px; border-radius: 6px;
+  }
+  .top-actions { display: flex; align-items: center; gap: 10px; }
+  .back-link {
+    display: inline-flex; align-items: center; gap: 8px; text-decoration: none;
+    font-size: 14px; font-weight: 500; color: var(--text-muted);
+    border: 1px solid var(--border); background: var(--btn-face);
+    padding: 9px 15px; border-radius: 9px; transition: all .2s ease;
+  }
+  .back-link:hover { color: var(--text); border-color: var(--brand-gold); }
+  .back-link svg { width: 15px; height: 15px; }
+  .icon-btn {
+    width: 38px; height: 38px; border-radius: 9px; border: 1px solid var(--border);
+    background: var(--btn-face); color: var(--text-muted); display: grid; place-items: center;
+    cursor: pointer; transition: all .2s ease;
+  }
+  .icon-btn:hover { color: var(--text); border-color: var(--brand-gold); }
+
+  /* Hero */
+  .hero { padding: 30px 0 34px; border-bottom: 1px solid var(--border-soft); }
+  .hero .ico-row { display: flex; align-items: center; gap: 16px; margin-bottom: 18px; }
+  .hero .ico {
+    width: 52px; height: 52px; border-radius: 14px; display: grid; place-items: center;
+    color: #fff; background: linear-gradient(135deg, #45c7c7, #2f8f8f); flex-shrink: 0;
+  }
+  .hero .ico svg { width: 26px; height: 26px; }
+  .hero h1 { font-family: 'Space Grotesk', sans-serif; font-size: clamp(28px, 4vw, 40px); font-weight: 600; letter-spacing: -0.025em; line-height: 1.05; }
+  .hero .status-line { display: flex; align-items: center; gap: 10px; margin-top: 6px; }
+  .hero .status { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--grad-lime); display: inline-flex; align-items: center; gap: 6px; }
+  .hero .status .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--grad-lime); }
+  .hero p { color: var(--text-muted); font-size: 15px; max-width: 620px; margin-top: 14px; }
+
+  /* Download */
+  .cta-row { margin: 30px 0 10px; }
+  .download {
+    display: inline-flex; align-items: center; gap: 10px; text-decoration: none;
+    font-family: 'Inter', sans-serif; font-size: 15px; font-weight: 600; color: #fff;
+    background: linear-gradient(135deg, var(--brand-purple), var(--brand-magenta));
+    border: none; padding: 13px 24px; border-radius: 10px; cursor: pointer;
+    box-shadow: 0 4px 18px -6px rgba(81,46,110,.7); transition: transform .15s ease, box-shadow .2s ease;
+  }
+  .download:hover { transform: translateY(-1px); box-shadow: 0 8px 24px -6px rgba(81,46,110,.85); }
+  .download svg { width: 17px; height: 17px; }
+
+  /* Sections */
+  .section { padding: 34px 0 4px; }
+  .eyebrow {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: .22em;
+    text-transform: uppercase; color: var(--text-faint); margin-bottom: 18px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .eyebrow::after { content: ""; flex: 1; height: 1px; background: var(--border-soft); }
+
+  .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 22px 24px; margin-bottom: 16px; }
+  .panel h2 { font-family: 'Space Grotesk', sans-serif; font-size: 16px; font-weight: 600; margin-bottom: 12px; }
+  .panel p, .panel li { font-size: 14px; color: var(--text-muted); line-height: 1.65; }
+  .panel ol, .panel ul { margin: 6px 0 0 18px; display: grid; gap: 7px; }
+  .panel code {
+    font-family: 'JetBrains Mono', monospace; font-size: 12.5px; background: var(--surface-2);
+    border: 1px solid var(--border-soft); padding: 2px 6px; border-radius: 5px; color: var(--brand-gold);
+  }
+  .note {
+    margin-top: 14px; background: var(--surface-2); border: 1px solid var(--border-soft);
+    border-left: 3px solid var(--brand-gold); border-radius: 8px; padding: 11px 15px;
+    font-size: 13px; color: var(--text-muted);
+  }
+  table { border-collapse: collapse; width: 100%; margin-top: 6px; font-size: 13.5px; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border-soft); }
+  th { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--text-faint); }
+  td { color: var(--text-muted); }
+
+  footer { text-align: center; color: var(--text-faint); font-size: 12.5px; padding: 30px 0 42px; font-family: 'JetBrains Mono', monospace; }
+
+  @media (max-width: 620px) {
+    .shell { padding: 0 18px; }
+    .brand-text .tag { display: none; }
+  }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+
+<!-- Ambient CorroHealth arc ripple (same as hub) -->
+<svg class="ambient" viewBox="0 0 1100 700" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <defs>
+    <linearGradient id="rip" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#9ccb3b"/><stop offset="0.5" stop-color="#35b6b6"/><stop offset="1" stop-color="#5b2d86"/>
+    </linearGradient>
+  </defs>
+  <g stroke="url(#rip)" stroke-width="2" opacity="0.6">
+    <circle cx="550" cy="230" r="60"/>
+    <path d="M420 300 A130 130 0 0 0 680 300"/>
+    <path d="M360 320 A190 190 0 0 0 740 320"/>
+    <path d="M300 340 A250 250 0 0 0 800 340"/>
+    <path d="M240 360 A310 310 0 0 0 860 360"/>
+  </g>
+</svg>
+
+<div class="shell">
+
+  <header>
+    <div class="brand">
+      <svg class="mark" viewBox="0 0 120 100" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <defs>
+          <linearGradient id="corro" x1="0" y1="0.4" x2="1" y2="0.6">
+            <stop offset="0" stop-color="#9ccb3b"/><stop offset="0.5" stop-color="#35b6b6"/><stop offset="1" stop-color="#5b2d86"/>
+          </linearGradient>
+        </defs>
+        <g stroke="url(#corro)" stroke-width="7" stroke-linecap="round">
+          <circle cx="60" cy="30" r="12"/>
+          <path d="M38 52 A22 22 0 0 0 82 52"/>
+          <path d="M28 58 A32 32 0 0 0 92 58"/>
+          <path d="M18 64 A42 42 0 0 0 102 64"/>
+        </g>
+      </svg>
+      <div class="brand-text">
+        <span class="name">CorroHealth</span>
+        <span class="tag">Power Tools</span>
+      </div>
+    </div>
+    <div class="top-actions">
+      <a class="back-link" href="../">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        Back to hub
+      </a>
+      <button class="icon-btn" id="themeBtn" aria-label="Toggle theme" title="Toggle theme">
+        <svg id="themeIcon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></svg>
+      </button>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="ico-row">
+      <div class="ico">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+      </div>
+      <div>
+        <h1>User Provisioning Wizard</h1>
+        <div class="status-line"><span class="status"><span class="dot"></span>live</span></div>
+      </div>
+    </div>
+    <p>Create Microsoft&nbsp;365 / Entra&nbsp;ID users, assign licenses, and add group memberships — for both Domestic&nbsp;(US) and Global&nbsp;/&nbsp;India onboarding, from one interface.</p>
+    <div class="cta-row">
+      <a class="download" href="UserProvisioningWizard.zip" download>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Download the tool (.zip)
+      </a>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="eyebrow">Getting started</div>
+    <div class="panel">
+      <h2>This is a desktop tool</h2>
+      <p>Unlike the browser-based tools on the hub, this one runs locally because it creates users with admin permissions through PowerShell. Download the ZIP, unzip it, and launch it from the folder.</p>
+      <ol>
+        <li>Download and unzip the package. Keep all files together in one folder.</li>
+        <li>Double-click <code>Launch-UserProvisioningWizard.bat</code>.</li>
+        <li>First run on a machine: Windows SmartScreen may prompt — click <strong>More info → Run anyway</strong>.</li>
+        <li>Sign in to Microsoft Graph and Exchange Online when prompted.</li>
+      </ol>
+      <div class="note">Launch through the <code>.bat</code>, not the <code>.ps1</code> directly — it starts PowerShell in the mode the wizard and the Exchange sign-in require.</div>
+    </div>
+    <div class="panel">
+      <h2>Prerequisites</h2>
+      <ul>
+        <li>Windows PowerShell 5.1 (built in) or PowerShell 7.</li>
+        <li>Modules: <code>Microsoft.Graph</code> and <code>ExchangeOnlineManagement</code>.</li>
+        <li>An account with rights to create users and assign licenses (Graph <code>User.ReadWrite.All</code>, <code>Group.ReadWrite.All</code>, plus Exchange admin).</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="eyebrow">Reference</div>
+    <div class="panel">
+      <h2>License reference (Global mode)</h2>
+      <table>
+        <tr><th>Mailbox size</th><th>License granted</th></tr>
+        <tr><td>2GB</td><td>F3</td></tr>
+        <tr><td>50GB</td><td>F3 + Exchange Archive (F3+)</td></tr>
+        <tr><td>E3</td><td>E3 (full desktop Office)</td></tr>
+        <tr><td>EntApps = Y</td><td>Adds Microsoft 365 Apps for Enterprise</td></tr>
+      </table>
+      <p style="margin-top:12px;">Domestic mode uses the license names (F3 / F3+ / E3) directly; they map to the same underlying licenses.</p>
+    </div>
+    <div class="panel">
+      <h2>Safety behavior</h2>
+      <ul>
+        <li>Existing users are never modified — skipped and flagged (enabled or disabled) so they can be handled manually.</li>
+        <li>Invalid rows are skipped individually; the rest of the batch still runs.</li>
+        <li>A missing group or failed license doesn't fail the user; the account is still created and the issue is noted.</li>
+        <li>Unique per-user passwords are generated (or a shared one), forced to change at first sign-in.</li>
+        <li>A results CSV with per-user status and password is written after each run — treat it as sensitive.</li>
+      </ul>
+    </div>
+  </section>
+
+  <footer>CorroHealth · Internal IT Tools · <span id="year"></span></footer>
+</div>
+
+<script>
+  const SUN = '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>';
+  const MOON = '<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>';
+  function setTheme(mode){
+    document.documentElement.setAttribute('data-theme', mode);
+    document.getElementById('themeIcon').innerHTML = mode === 'dark' ? MOON : SUN;
+    try { localStorage.setItem('corro-hub-theme', mode); } catch(e){}
+  }
+  document.getElementById('themeBtn').addEventListener('click', () => {
+    const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    setTheme(next);
+  });
+  (function init(){
+    let saved = 'dark';
+    try { saved = localStorage.getItem('corro-hub-theme') || 'dark'; } catch(e){}
+    setTheme(saved);
+    document.getElementById('year').textContent = new Date().getFullYear();
+  })();
+</script>
+</body>
+</html>
