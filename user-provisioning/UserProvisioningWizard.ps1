@@ -53,9 +53,18 @@
 # PowerShell process and exit the current one.
 if ([System.Threading.Thread]::CurrentThread.GetApartmentState() -ne [System.Threading.ApartmentState]::STA) {
     $scriptPath = $MyInvocation.MyCommand.Path
-    if ($scriptPath) {
+    if (-not $scriptPath) { $scriptPath = $PSCommandPath }
+    if (-not $scriptPath) { $scriptPath = $MyInvocation.MyCommand.Definition }
+
+    if ($scriptPath -and (Test-Path $scriptPath)) {
         Start-Process -FilePath "powershell.exe" `
             -ArgumentList @("-NoProfile", "-STA", "-ExecutionPolicy", "Bypass", "-File", "`"$scriptPath`"")
+        exit
+    } else {
+        Add-Type -AssemblyName System.Windows.Forms
+        [System.Windows.Forms.MessageBox]::Show(
+            "This tool must run in STA mode, but it was started in MTA and could not relaunch itself automatically.`n`nPlease launch it using Launch-UserProvisioningWizard.bat instead.",
+            "Please use the .bat launcher", "OK", "Warning") | Out-Null
         exit
     }
 }
@@ -177,8 +186,18 @@ while ($true) {
 #  Connect
 # ============================================================
 Write-Host "Connecting to Microsoft Graph and Exchange Online..." -ForegroundColor Cyan
-Connect-MgGraph -NoWelcome -Scopes "User.ReadWrite.All", "Group.ReadWrite.All"
-Connect-ExchangeOnline
+try {
+    Connect-MgGraph -NoWelcome -Scopes "User.ReadWrite.All", "Group.ReadWrite.All" -ErrorAction Stop
+} catch {
+    [System.Windows.Forms.MessageBox]::Show("Could not connect to Microsoft Graph:`n`n$($_.Exception.Message)", "Graph sign-in failed", "OK", "Error") | Out-Null
+    exit
+}
+try {
+    Connect-ExchangeOnline -ShowBanner:$false -ErrorAction Stop
+} catch {
+    [System.Windows.Forms.MessageBox]::Show("Could not connect to Exchange Online:`n`n$($_.Exception.Message)`n`nIf this is the STA / ActiveX error, make sure you launched via Launch-UserProvisioningWizard.bat.", "Exchange sign-in failed", "OK", "Error") | Out-Null
+    exit
+}
 
 $scriptDir = if ($PSScriptRoot) { $PSScriptRoot } else { (Get-Location).Path }
 $timestamp = Get-Date -Format "yyyyMMdd_HHmmss"
@@ -658,8 +677,15 @@ $btnRunImport.Add_Click({
                 "F3"  { Set-MgUserLicense -UserId $upn -AddLicenses @{SkuId=$skus.F3.SkuId} -RemoveLicenses @() -ErrorAction Stop; $notes += "F3" }
                 "F3+" {
                     Set-MgUserLicense -UserId $upn -AddLicenses @{SkuId=$skus.F3.SkuId} -RemoveLicenses @() -ErrorAction Stop
-                    Set-MgUserLicense -UserId $upn -AddLicenses @{SkuId=$skus.Archive.SkuId} -RemoveLicenses @() -ErrorAction Stop
-                    $notes += "F3+Archive"
+                    if ($mode -eq "Global") {
+                        # Global "50GB" tier = F3 + Exchange Online Archiving (bigger mailbox).
+                        Set-MgUserLicense -UserId $upn -AddLicenses @{SkuId=$skus.Archive.SkuId} -RemoveLicenses @() -ErrorAction Stop
+                        $notes += "F3 + Exchange Archive (50GB)"
+                    } else {
+                        # Domestic "F3+" = F3 + Microsoft 365 Apps for enterprise (desktop Office).
+                        Set-MgUserLicense -UserId $upn -AddLicenses @{SkuId=$skus.Apps.SkuId} -RemoveLicenses @() -ErrorAction Stop
+                        $notes += "F3 + Apps for Enterprise"
+                    }
                 }
                 "E3"  { Set-MgUserLicense -UserId $upn -AddLicenses @{SkuId=$skus.E3.SkuId} -RemoveLicenses @() -ErrorAction Stop; $notes += "E3" }
             }
