@@ -8,6 +8,11 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<!-- MSAL sign-in library. Recommended: download msal-browser.min.js into a /shared folder in your
+     repo (matches your lead's setup and works with MSAL v3+). Zero-file alternative: comment the
+     line below and uncomment the Microsoft CDN line (serves the older but functional v2.35.0). -->
+<script src="shared/msal-browser.min.js"></script>
+<!-- <script src="https://alcdn.msauth.net/browser/2.35.0/js/msal-browser.min.js"></script> -->
 <style>
   /* ============================================================
      CorroHealth Tools Hub
@@ -124,6 +129,28 @@
   }
   .signin:hover { transform: translateY(-1px); box-shadow: 0 8px 24px -6px rgba(81,46,110,.85); }
   .signin svg { width: 16px; height: 16px; }
+  .signin.loading { opacity: .7; pointer-events: none; }
+
+  .account-chip {
+    display: flex; align-items: center; gap: 9px;
+    border: 1px solid var(--border); background: var(--btn-face);
+    border-radius: 9px; padding: 5px 8px 5px 6px;
+  }
+  .acct-initials {
+    width: 26px; height: 26px; border-radius: 7px; flex-shrink: 0;
+    display: grid; place-items: center;
+    font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 500; color: #fff;
+    background: linear-gradient(135deg, var(--brand-purple), var(--brand-magenta));
+  }
+  .acct-name {
+    font-size: 13px; color: var(--text); max-width: 150px;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .acct-signout {
+    background: none; border: none; cursor: pointer; color: var(--text-faint);
+    display: grid; place-items: center; padding: 3px; border-radius: 6px;
+  }
+  .acct-signout:hover { color: var(--brand-gold); }
 
   /* ---------- Hero ---------- */
   .hero {
@@ -188,6 +215,9 @@
   .card:hover { transform: translateY(-3px); border-color: var(--brand-gold); background: var(--surface-hover); }
   .card:hover::before { opacity: 1; }
   .card:focus-visible { outline: 2px solid var(--brand-gold); outline-offset: 2px; }
+  .card.locked { cursor: default; opacity: .6; }
+  .card.locked:hover { transform: none; border-color: var(--border); background: var(--surface); }
+  .card.locked:hover::before { opacity: 0; }
 
   .card .ico {
     width: 44px; height: 44px; border-radius: 12px;
@@ -231,6 +261,19 @@
   .t-plum   { background: linear-gradient(135deg, #9a5fbf, #6b3d92); }
   .t-wine   { background: linear-gradient(135deg, #a2356f, #6d1a52); }
   .t-brand  { background: linear-gradient(135deg, var(--grad-lime), var(--grad-teal) 55%, var(--brand-purple)); }
+
+  /* ---------- Access notice ---------- */
+  .notice {
+    display: flex; align-items: center; gap: 11px;
+    margin: 30px 0 4px; padding: 14px 18px;
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--brand-gold);
+    border-radius: 12px;
+    background: var(--surface);
+    color: var(--text-muted); font-size: 14px;
+  }
+  .notice svg { color: var(--brand-gold); flex-shrink: 0; }
+  .notice strong { color: var(--text); font-weight: 600; }
 
   /* ---------- Empty state ---------- */
   .empty {
@@ -371,6 +414,17 @@
       <button class="icon-btn" id="themeBtn" aria-label="Toggle theme" title="Toggle theme">
         <svg id="themeIcon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></svg>
       </button>
+      <button class="signin" id="signInBtn">
+        <svg viewBox="0 0 21 21" width="15" height="15" fill="none"><rect x="1" y="1" width="9" height="9" fill="#f25022"/><rect x="11" y="1" width="9" height="9" fill="#7fba00"/><rect x="1" y="11" width="9" height="9" fill="#00a4ef"/><rect x="11" y="11" width="9" height="9" fill="#ffb900"/></svg>
+        <span>Sign in</span>
+      </button>
+      <div class="account-chip" id="accountChip" style="display:none">
+        <span class="acct-initials" id="acctInitials"></span>
+        <span class="acct-name" id="acctName"></span>
+        <button class="acct-signout" id="signOutBtn" aria-label="Sign out" title="Sign out">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        </button>
+      </div>
     </div>
   </header>
 
@@ -384,6 +438,11 @@
   </section>
 
   <!-- Tool sections render here -->
+  <div id="accessNotice" class="notice" style="display:none">
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+    <span id="accessNoticeText"></span>
+  </div>
+
   <main id="sections"></main>
 
   <footer>CorroHealth · Internal IT Tools · <span id="version"></span> · <span id="year"></span></footer>
@@ -407,6 +466,42 @@
 // Hub version — bump this string whenever you ship a change (shown in the footer).
 const VERSION = 'v1.0';
 
+/* ============================================================
+   SIGN-IN (Microsoft Entra / MSAL)
+   ------------------------------------------------------------
+   Pins sign-in to the CorroHealth tenant, so only Corro accounts
+   can authenticate. The library is loaded via the <script> tag in
+   <head> (shared/msal-browser.min.js). If MSAL isn't present the
+   hub still renders — the Sign in button just won't do anything.
+   ============================================================ */
+const AUTH = {
+  clientId : '7a82c6f1-f8ba-464c-b461-d22cce20f099',   // your app registration (Application/client ID)
+  tenantId : '683d57e7-70bf-4bc4-b88d-bd8905a0c39a',   // CorroHealth tenant — restricts sign-in to Corro accounts
+  // Delegated Graph scopes requested at sign-in. 'User.Read' is enough to sign in and identify
+  // the user. To gate tiles by group membership (GROUP_GATES below), add a scope that permits the
+  // membership check — typically 'Directory.Read.All' or 'GroupMember.Read.All', admin-consented
+  // once in the app registration.
+  scopes   : ['User.Read', 'Directory.Read.All'],
+};
+
+/* ============================================================
+   ADMIN GATES (optional) — lock a tile until the signed-in user
+   is a member of a specific Entra security group.
+   ------------------------------------------------------------
+   Empty = every tile is visible to any signed-in Corro user.
+   To enable: 1) paste a group's OBJECT ID below under a key,
+              2) add `gate: '<that key>'` to any tool in TOOLS,
+              3) add 'Directory.Read.All' to AUTH.scopes above.
+   A gated tile shows a padlock and isn't clickable until the
+   signed-in user is verified (via Graph) as a group member.
+   NOTE: this controls VISIBILITY (a soft/UX gate). The real
+   protection is each tool's own sign-in + least-privilege Graph
+   permissions — the hub gate is not a security boundary on its own.
+   ============================================================ */
+const GROUP_GATES = {
+  admin: 'faf57959-3e0b-4585-b678-57a1427be267',   // CorroHealth admin security group (Object ID)
+};
+
 const TOOLS = [
 
   {
@@ -417,6 +512,7 @@ const TOOLS = [
     tint    : 't-purple',
     status  : 'live',
     auth    : true,
+    gate    : 'admin',
     url     : 'device-cleanup/',
   },
 
@@ -428,6 +524,7 @@ const TOOLS = [
     tint    : 't-magenta',
     status  : 'live',
     auth    : true,
+    gate    : 'admin',
     url     : 'user-provisioning/',
   },
 
@@ -500,22 +597,38 @@ function render(){
   }
 
   host.innerHTML = order.map(sec => {
-    const cards = groups[sec].map(t => `
-      <a class="card" href="${t.url || '#'}">
+    const cards = groups[sec].map(t => {
+      const locked = t.gate && !unlockedGates.has(t.gate);
+      const showLock = locked || t.auth;
+      const inner = `
         <div class="ico ${t.tint}">${svgWrap(ICONS[t.icon] || ICONS.grid)}</div>
         <h3>${t.name}</h3>
         <p>${t.desc}</p>
         <div class="foot">
-          ${t.auth ? `<span class="lock" title="Sign-in required">${LOCK}</span>` : ''}
+          ${showLock ? `<span class="lock" title="${locked ? 'Requires access — sign in as an authorized user' : 'Sign-in required'}">${LOCK}</span>` : ''}
           <span class="status ${t.status}"><span class="dot"></span>${t.status}</span>
-        </div>
-      </a>`).join('');
+        </div>`;
+      return locked
+        ? `<div class="card locked">${inner}</div>`
+        : `<a class="card" href="${t.url || '#'}">${inner}</a>`;
+    }).join('');
     return `<section class="section"><div class="eyebrow">${sec}</div><div class="grid">${cards}</div></section>`;
   }).join('');
 
   const total = TOOLS.length;
   const active = TOOLS.filter(t => ['live', 'updating', 'beta'].includes(t.status)).length;
   document.getElementById('counterText').textContent = `${total} tool${total === 1 ? '' : 's'} · ${active} active`;
+
+  // Access notice: signed in, but a member of none of the gated groups (all gated tiles locked)
+  const notice = document.getElementById('accessNotice');
+  const gatedLockedExist = TOOLS.some(t => t.gate && !unlockedGates.has(t.gate));
+  if(account && gatedLockedExist && unlockedGates.size === 0){
+    document.getElementById('accessNoticeText').innerHTML =
+      `You're signed in as <strong>${account.name || account.username || 'your account'}</strong>, but your account isn't in the group required for the padlocked tools. Contact IT to request access.`;
+    notice.style.display = 'flex';
+  } else {
+    notice.style.display = 'none';
+  }
 }
 
 /* ---- Theme ---- */
@@ -533,6 +646,101 @@ document.getElementById('themeBtn').addEventListener('click', () => {
   setTheme(next);
 });
 
+/* ---- Sign-in (MSAL) ---- */
+let pca = null;
+let account = null;
+let unlockedGates = new Set();
+
+function initials(name){
+  return (name || '').split(' ').map(w => w[0]).filter(Boolean).join('').slice(0,2).toUpperCase() || 'ME';
+}
+
+function updateAuthUI(){
+  const signInBtn = document.getElementById('signInBtn');
+  const chip = document.getElementById('accountChip');
+  if(account){
+    const name = account.name || account.username || '';
+    signInBtn.style.display = 'none';
+    chip.style.display = 'flex';
+    document.getElementById('acctInitials').textContent = initials(name);
+    document.getElementById('acctName').textContent = name;
+  } else {
+    signInBtn.style.display = '';
+    chip.style.display = 'none';
+  }
+}
+
+async function getToken(){
+  const req = { scopes: AUTH.scopes, account };
+  try { return (await pca.acquireTokenSilent(req)).accessToken; }
+  catch(_) { return (await pca.acquireTokenPopup(req)).accessToken; }
+}
+
+async function runGateChecks(){
+  const keys = Object.keys(GROUP_GATES);
+  if(!keys.length){ unlockedGates = new Set(); return; }
+  try {
+    const token = await getToken();
+    const ids = keys.map(k => GROUP_GATES[k]);
+    const res = await fetch('https://graph.microsoft.com/v1.0/me/checkMemberObjects', {
+      method:'POST',
+      headers:{ Authorization:'Bearer '+token, 'Content-Type':'application/json' },
+      body: JSON.stringify({ ids }),
+    });
+    if(res.ok){
+      const member = (await res.json()).value || [];
+      unlockedGates = new Set(keys.filter(k => member.includes(GROUP_GATES[k])));
+    }
+  } catch(e){ console.warn('Gate check failed:', e); }
+}
+
+async function afterSignIn(){
+  updateAuthUI();
+  await runGateChecks();
+  render();
+}
+
+async function authInit(){
+  const redirectUri = window.location.href.split('#')[0].split('?')[0];
+  console.info('%c[Hub] Redirect URI to register  (App registration → Authentication → Single-page application):\n       ' + redirectUri, 'font-weight:bold;color:#e7b524');
+  if(typeof msal === 'undefined'){ console.warn('[Hub] MSAL library not loaded — add shared/msal-browser.min.js to the repo. Sign-in is disabled until then.'); return; }
+  try {
+    pca = new msal.PublicClientApplication({
+      auth: {
+        clientId: AUTH.clientId,
+        authority: 'https://login.microsoftonline.com/' + AUTH.tenantId,
+        redirectUri,
+      },
+      cache: { cacheLocation: 'localStorage' },
+    });
+    if(pca.initialize) await pca.initialize();          // required by MSAL v3+, harmless on v2
+    const accts = pca.getAllAccounts();
+    if(accts.length){ account = accts[0]; pca.setActiveAccount(account); await afterSignIn(); }
+  } catch(e){ console.warn('Auth init failed:', e); }
+}
+
+async function signIn(){
+  if(!pca){ return; }
+  const btn = document.getElementById('signInBtn');
+  btn.classList.add('loading');
+  try {
+    const res = await pca.loginPopup({ scopes: AUTH.scopes });
+    account = res.account; pca.setActiveAccount(account);
+    await afterSignIn();
+  } catch(e){ console.warn('Sign-in cancelled or failed:', e); }
+  finally { btn.classList.remove('loading'); }
+}
+
+async function signOut(){
+  if(!pca || !account) return;
+  try { await pca.logoutPopup({ account }); } catch(_){}
+  account = null; unlockedGates = new Set();
+  updateAuthUI(); render();
+}
+
+document.getElementById('signInBtn').addEventListener('click', signIn);
+document.getElementById('signOutBtn').addEventListener('click', signOut);
+
 (function init(){
   let saved = 'dark';
   try { saved = localStorage.getItem('corro-hub-theme') || 'dark'; } catch(e){}
@@ -540,6 +748,7 @@ document.getElementById('themeBtn').addEventListener('click', () => {
   document.getElementById('version').textContent = VERSION;
   document.getElementById('year').textContent = new Date().getFullYear();
   render();
+  authInit();
 })();
 </script>
 </body>
