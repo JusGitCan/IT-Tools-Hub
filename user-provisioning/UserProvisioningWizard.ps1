@@ -31,11 +31,18 @@
     * Results CSV (per-user password + status) + transcript written next to
       the script. Treat the results file as sensitive.
 
-    Domestic License <-> Global Mailbox size (same underlying SKUs):
-        F3   <-> 2GB   -> SPE_F1
-        F3+  <-> 50GB  -> SPE_F1 + EXCHANGEARCHIVE_ADDON
-        E3   <-> E3    -> SPE_E3
-        EntApps = Y (Global) adds OFFICESUBSCRIPTION on top.
+    License mapping (same base SKU, mode-specific add-on for the "+" tier):
+        Domestic F3    = SPE_F1                              (F3)
+        Domestic F3+   = SPE_F1 + OFFICESUBSCRIPTION         (F3 + Apps for Enterprise, desktop Office)
+        Domestic E3    = SPE_E3                              (E3)
+
+        Global 2GB     = SPE_F1                              (F3)
+        Global 50GB    = SPE_F1 + EXCHANGEARCHIVE_ADDON      (F3 + Exchange archive, bigger mailbox)
+        Global E3      = SPE_E3                              (E3)
+        Global EntApps = Y adds OFFICESUBSCRIPTION on top of any of the above.
+
+    Note the deliberate difference: the "+" tier means Apps for Enterprise in
+    Domestic (desktop Office), but Exchange archiving in Global (mailbox size).
 
     "Groups" = Entra ID / Exchange distribution membership, NOT Azure
     Resource Groups.

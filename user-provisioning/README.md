@@ -92,17 +92,28 @@ switches to Global mode.
 
 ### License reference (Global mode)
 
-Mailbox size maps to licenses as follows:
+The **"+" tier means different things by mode** — desktop apps for Domestic,
+a bigger mailbox for Global:
+
+**Global / India** (input is mailbox size):
 
 | Mailbox size | License granted |
 |--------------|-----------------|
 | `2GB` | F3 |
-| `50GB` | F3 + Exchange Archive (a.k.a. "F3+") |
+| `50GB` | F3 + Exchange Online Archiving (bigger mailbox) |
 | `E3` | E3 (full desktop Office) |
 | `EntApps = Y` | Adds Microsoft 365 Apps for Enterprise on top of any of the above |
 
-Domestic mode uses the license names (`F3` / `F3+` / `E3`) directly; they map
-to the same underlying licenses.
+**Domestic** (input is license type):
+
+| License | Granted |
+|---------|---------|
+| `F3` | F3 |
+| `F3+` | F3 + Microsoft 365 Apps for Enterprise (desktop Office) |
+| `E3` | E3 (full desktop Office) |
+
+Both modes share the same base SKUs; only the add-on for the "+" tier differs
+(Apps for Enterprise in Domestic, Exchange archiving in Global).
 
 ### Groups
 
