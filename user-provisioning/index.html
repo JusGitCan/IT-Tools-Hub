@@ -189,7 +189,7 @@
         <div class="status-line"><span class="status"><span class="dot"></span>live</span></div>
       </div>
     </div>
-    <p>Create Microsoft&nbsp;365 / Entra&nbsp;ID users, assign licenses, and add group memberships — for both Domestic&nbsp;(US) and Global&nbsp;/&nbsp;India onboarding, from one interface.</p>
+    <p>Create Microsoft&nbsp;365 / Entra&nbsp;ID users, assign licenses, and add group memberships — for both Domestic&nbsp;(US) and Global&nbsp;/&nbsp;India onboarding, from one interface. Domestic users are also invited as B2B guests into a separate external tenant.</p>
     <div class="cta-row">
       <a class="download" href="UserProvisioningWizard.zip" download>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -217,6 +217,7 @@
         <li>Windows PowerShell 5.1 (built in) or PowerShell 7.</li>
         <li>Modules: <code>Microsoft.Graph</code> and <code>ExchangeOnlineManagement</code>.</li>
         <li>An account with rights to create users and assign licenses (Graph <code>User.ReadWrite.All</code>, <code>Group.ReadWrite.All</code>, plus Exchange admin).</li>
+        <li>For Domestic batches only: a second sign-in to the external tenant, with rights there to invite guests and edit profiles (Guest Inviter or User Administrator). See "External tenant invites" below.</li>
       </ul>
     </div>
   </section>
@@ -239,6 +240,17 @@
         <tr><td>E3</td><td>E3 (full desktop Office)</td></tr>
       </table>
       <p style="margin-top:12px;">The "+" tier differs by mode: Apps for Enterprise in Domestic, Exchange archiving in Global. Same base licenses otherwise.</p>
+    </div>
+    <div class="panel">
+      <h2>External tenant invites (Domestic mode only)</h2>
+      <p>After a Domestic batch finishes creating users in the home tenant, each new user is also invited as a B2B guest into a separate external tenant — same UPN, no invite email sent, first/last name and job title copied over, no groups or roles assigned there.</p>
+      <ul>
+        <li>Global/India batches are not affected — this only runs for Domestic.</li>
+        <li>The tool signs in a second time, to the external tenant, partway through the run, then reconnects to the home tenant automatically once done.</li>
+        <li>Whoever signs in at that prompt needs rights in the external tenant to invite guests and edit profiles (Guest Inviter or User Administrator).</li>
+        <li>The first time this runs in that tenant, a one-time consent screen may appear for the <code>User.Invite.All</code> and <code>User.ReadWrite.All</code> permissions — an admin there needs to accept it (or check "Consent on behalf of your organization" if offered) so future runs don't prompt again.</li>
+        <li>If the external sign-in or an invite fails, the home-tenant account is still created — the failure is only noted in Status and the results CSV.</li>
+      </ul>
     </div>
     <div class="panel">
       <h2>Safety behavior</h2>

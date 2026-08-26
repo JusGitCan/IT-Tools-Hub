@@ -143,6 +143,34 @@ imports. Columns:
 
 ---
 
+## External tenant guest invitations (Domestic mode only)
+
+After a **Domestic** batch finishes creating users, each newly created user
+is automatically invited as a B2B guest into a separate external tenant, in
+addition to their new account in your home tenant. This mirrors Entra's
+**Invite external user (Preview)** flow:
+
+- The invited email is the **same UPN** just created in the home tenant.
+- **Send invite message** is left unchecked - no email goes out.
+- First name, last name, and job title are copied onto the external guest
+  account.
+- No groups or roles are assigned in the external tenant.
+
+This does **not** run for Global/India batches.
+
+Because this is a different tenant, the tool signs in a second time partway
+through the run, specifically for this step, and then reconnects to your
+home tenant automatically before finishing. Whoever signs in at that prompt
+needs rights in the external tenant to invite guests and edit their profile
+(e.g. Guest Inviter or User Administrator there), and Microsoft Graph
+PowerShell needs to have been granted `User.Invite.All` and
+`User.ReadWrite.All` in that tenant at least once (a one-time admin consent
+prompt will appear if it hasn't been).
+
+If the external sign-in or an individual invite fails, the affected user(s)
+are still created in your home tenant - the failure is only noted in the
+Status column and results CSV, and the rest of the batch continues.
+
 ## Safety behavior
 
 The tool is deliberately conservative:

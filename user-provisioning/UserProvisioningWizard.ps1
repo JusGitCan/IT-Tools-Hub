@@ -122,6 +122,18 @@ $validSizes     = @("2GB", "50GB", "E3")
 $validCountries = @("US", "IN")
 $validYesNo     = @("N", "Y")
 
+# ============================================================
+#  External tenant B2B guest invitation (Domestic mode only)
+# ============================================================
+# After a Domestic-mode batch finishes creating users in the home tenant,
+# each newly created user is also invited as a B2B guest into this external
+# tenant, using the same UPN as the invited email address. This mirrors the
+# Entra "Invite external user (Preview)" flow: Basics (email/display name,
+# invite message unchecked) + Properties (first/last name, job title). No
+# groups or roles are assigned in the external tenant.
+$externalTenantId          = "10096675-b04b-4d53-88e6-9c640623b9ea"
+$externalInviteRedirectUrl = "https://myapplications.microsoft.com/"
+
 function Resolve-LicenseTier {
     param([string]$Value)
     switch (($Value + "").Trim().ToUpper()) {
@@ -199,6 +211,9 @@ try {
     [System.Windows.Forms.MessageBox]::Show("Could not connect to Microsoft Graph:`n`n$($_.Exception.Message)", "Graph sign-in failed", "OK", "Error") | Out-Null
     exit
 }
+# Remembered so the script can switch to the external tenant for guest
+# invitations later and then reconnect back to the home tenant afterward.
+$homeTenantId = (Get-MgContext).TenantId
 try {
     Connect-ExchangeOnline -ShowBanner:$false -ErrorAction Stop
 } catch {
@@ -700,7 +715,7 @@ $btnRunImport.Add_Click({
         } catch { $notes += "License FAILED: $($_.Exception.Message)" }
 
         & $recordStatus ($notes -join " | ")
-        $created += [PSCustomObject]@{ Row=$row; Upn=$upn; Oid=$userOid; Tier=$tier; Subcon=$subcon; Internal=$internal; GroupsRaw=$groupsRaw; Notes=$notes; Country=$country }
+        $created += [PSCustomObject]@{ Row=$row; Upn=$upn; Oid=$userOid; Tier=$tier; Subcon=$subcon; Internal=$internal; GroupsRaw=$groupsRaw; Notes=$notes; Country=$country; FirstName=$fn; LastName=$ln; JobTitle=$title }
     }
 
     if ($created.Count -gt 0) {
@@ -770,11 +785,76 @@ $btnRunImport.Add_Click({
                 if (-not $ok) { $notes += "Mailbox not ready within timeout - some Exchange steps may be incomplete" }
             }
 
+            $c.Notes = $notes
             $c.Row.Cells["Status"].Value = ($notes -join " | ")
             foreach ($res in $results) { if ($res.UserPrincipalName -eq $c.Upn) { $res.Status = ($notes -join " | ") } }
             $ready++
         }
         $lblProgress.Text = "Done - $ready user(s) processed."
+    }
+
+    # ============================================================
+    #  External tenant B2B guest invitation (Domestic mode only)
+    # ============================================================
+    # Skipped entirely for Global/India batches. Only fires for users that
+    # were actually created above (skipped/failed rows are excluded since
+    # they were never added to $created).
+    if ($mode -eq "Domestic" -and $created.Count -gt 0) {
+        $lblProgress.Text = "Connecting to external tenant for guest invitations..."; [System.Windows.Forms.Application]::DoEvents()
+        $extConnectOk = $true
+        try {
+            Disconnect-MgGraph -ErrorAction SilentlyContinue | Out-Null
+            Connect-MgGraph -TenantId $externalTenantId -Scopes "User.Invite.All", "User.ReadWrite.All" -NoWelcome -ErrorAction Stop
+        } catch {
+            $extConnectOk = $false
+            [System.Windows.Forms.MessageBox]::Show(
+                "Could not sign in to the external tenant for guest invitations:`n`n$($_.Exception.Message)`n`nAll users above were still created in your home tenant. None of them were invited externally - you can invite them manually, or fix sign-in and re-run.",
+                "External invite sign-in failed", "OK", "Warning") | Out-Null
+        }
+
+        if ($extConnectOk) {
+            $invited = 0
+            foreach ($c in $created) {
+                $lblProgress.Text = "Inviting external guest... ($invited of $($created.Count))"; [System.Windows.Forms.Application]::DoEvents()
+                $fullName = "$($c.FirstName) $($c.LastName)".Trim()
+
+                try {
+                    $inv = New-MgInvitation `
+                        -InvitedUserEmailAddress $c.Upn `
+                        -InvitedUserDisplayName $fullName `
+                        -SendInvitationMessage:$false `
+                        -InviteRedirectUrl $externalInviteRedirectUrl `
+                        -ErrorAction Stop
+                    $c.Notes += "External invite sent"
+
+                    try {
+                        Update-MgUser -UserId $inv.InvitedUser.Id -GivenName $c.FirstName -Surname $c.LastName -JobTitle $c.JobTitle -ErrorAction Stop
+                        $c.Notes += "External profile set (name/title)"
+                    } catch {
+                        $c.Notes += "External profile update FAILED: $($_.Exception.Message)"
+                    }
+                } catch {
+                    $c.Notes += "External invite FAILED: $($_.Exception.Message)"
+                }
+
+                $c.Row.Cells["Status"].Value = ($c.Notes -join " | ")
+                foreach ($res in $results) { if ($res.UserPrincipalName -eq $c.Upn) { $res.Status = ($c.Notes -join " | ") } }
+                $invited++
+            }
+            $lblProgress.Text = "Done - $invited external invite(s) processed."
+
+            # Switch back to the home tenant so the rest of this run (results
+            # export) and any later "Run import" click in this same session
+            # still talk to the right tenant.
+            try {
+                Disconnect-MgGraph -ErrorAction SilentlyContinue | Out-Null
+                Connect-MgGraph -TenantId $homeTenantId -Scopes "User.ReadWrite.All", "Group.ReadWrite.All" -NoWelcome -ErrorAction Stop
+            } catch {
+                [System.Windows.Forms.MessageBox]::Show(
+                    "External invitations finished, but reconnecting to your home tenant afterward failed:`n`n$($_.Exception.Message)`n`nIf you run another import in this session, you may be prompted to sign in again.",
+                    "Reconnect to home tenant failed", "OK", "Warning") | Out-Null
+            }
+        }
     }
 
     $form.Cursor = [System.Windows.Forms.Cursors]::Default; $btnRunImport.Enabled = $true
