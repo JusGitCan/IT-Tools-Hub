@@ -297,7 +297,8 @@ $btnUploadCsv      = New-ToolButton "Upload CSV" 95
 $btnRemoveSelected = New-ToolButton "Remove selected" 115
 $btnSelectAll      = New-ToolButton "Select all" 85
 $btnLicenseRef     = New-ToolButton "License reference" 120
-$toolbar.Controls.AddRange([System.Windows.Forms.Control[]]@($btnAddRow, $btnUserCreation, $btnUploadCsv, $btnRemoveSelected, $btnSelectAll, $btnLicenseRef))
+$btnExportResults  = New-ToolButton "Re-export last results" 150
+$toolbar.Controls.AddRange([System.Windows.Forms.Control[]]@($btnAddRow, $btnUserCreation, $btnUploadCsv, $btnRemoveSelected, $btnSelectAll, $btnLicenseRef, $btnExportResults))
 
 # ---- Grid ----
 $grid = New-Object System.Windows.Forms.DataGridView
@@ -324,6 +325,7 @@ $colFirst   = New-TextColumn "FirstName" 95
 $colLast    = New-TextColumn "LastName" 95
 $colUpn     = New-TextColumn "Upn" 160
 $colTitle   = New-TextColumn "JobTitle" 105
+$colManager = New-TextColumn "Manager" 160
 $colLicense = New-ComboColumn "License" 95 $validLicenses
 $colEntApps = New-ComboColumn "EntApps" 70 $validYesNo
 $colCountry = New-ComboColumn "Country" 65 $validCountries
@@ -338,7 +340,7 @@ $colStatus.ReadOnly = $true
 $colDelete = New-Object System.Windows.Forms.DataGridViewButtonColumn
 $colDelete.Name = "Delete"; $colDelete.Text = "Remove"; $colDelete.UseColumnTextForButtonValue = $true; $colDelete.Width = 70
 $grid.Columns.AddRange([System.Windows.Forms.DataGridViewColumn[]]@(
-    $colInclude, $colFirst, $colLast, $colUpn, $colTitle, $colLicense, $colEntApps,
+    $colInclude, $colFirst, $colLast, $colUpn, $colTitle, $colManager, $colLicense, $colEntApps,
     $colCountry, $colInternal, $colSubcon, $colCity, $colProvince, $colOffice, $colGroups, $colStatus, $colDelete
 ))
 
@@ -356,6 +358,7 @@ function Get-HeaderText($colName, $mode) {
         "LastName"          { return "Last name" }
         "Upn"               { return "Username" }
         "JobTitle"          { return "Job title" }
+        "Manager"           { return "Manager (UPN/email)" }
         "License"           { if ($mode -eq "Global") { return "Mailbox size" } else { return "License" } }
         "EntApps"           { return "EntApps" }
         "Country"           { return "Country" }
@@ -438,7 +441,7 @@ $form.Controls.Add($brandBar)
 #  Mode handling
 # ============================================================
 $script:currentMode = "Domestic"
-$domesticCols = @("Include","FirstName","LastName","Upn","JobTitle","License","Groups","Status","Delete")
+$domesticCols = @("Include","FirstName","LastName","Upn","JobTitle","Manager","License","Groups","Status","Delete")
 $globalCols   = @("Include","FirstName","LastName","Upn","JobTitle","License","EntApps","Country","InternalEmailOnly","Subcontractor","City","Province","Office","Status","Delete")
 
 function Set-Mode($mode) {
@@ -510,6 +513,19 @@ $grid.Add_CellClick({
 $btnLicenseRef.Add_Click({
     $msg = "Mailbox size  ->  License granted`n`n2GB   ->  F3`n50GB  ->  F3 + Exchange Archive (F3+)`nE3    ->  E3 (full desktop Office)`n`nEntApps = Y adds Microsoft 365 Apps for Enterprise on top of any of the above."
     [System.Windows.Forms.MessageBox]::Show($msg, "License reference", "OK", "Information") | Out-Null
+})
+$btnExportResults.Add_Click({
+    if (-not $script:lastResults -or $script:lastResults.Count -eq 0) {
+        [System.Windows.Forms.MessageBox]::Show("No import has been run yet in this session, so there's nothing to export.", "Nothing to export", "OK", "Information") | Out-Null
+        return
+    }
+    $reExportPath = Join-Path $scriptDir "UserProvisioning_Results_$(Get-Date -Format 'yyyyMMdd_HHmmss_fff')_reexport.csv"
+    try {
+        $script:lastResults | Export-Csv -Path $reExportPath -NoTypeInformation -ErrorAction Stop
+        [System.Windows.Forms.MessageBox]::Show("Last run's results (from $script:lastResultsPath) re-exported to:`n`n$reExportPath", "Re-export complete", "OK", "Information") | Out-Null
+    } catch {
+        [System.Windows.Forms.MessageBox]::Show("Could not re-export results:`n`n$($_.Exception.Message)", "Re-export failed", "OK", "Error") | Out-Null
+    }
 })
 
 # ---- User creation (paste names) ----
@@ -633,6 +649,7 @@ function Wait-ForMailbox($upn, $timeoutSeconds = 300, $intervalSeconds = 15) {
 # ============================================================
 $btnRunImport.Add_Click({
     $mode = $script:currentMode
+    $runTimestamp = Get-Date -Format "yyyyMMdd_HHmmss_fff"
     $rowsToProcess = @()
     foreach ($row in $grid.Rows) { if ($row.Cells["Include"].Value -eq $true) { $rowsToProcess += $row } }
     if ($rowsToProcess.Count -eq 0) { [System.Windows.Forms.MessageBox]::Show("No rows selected to import.", "Nothing to run", "OK", "Information") | Out-Null; return }
@@ -649,6 +666,7 @@ $btnRunImport.Add_Click({
         $ln = "$($row.Cells['LastName'].Value)".Trim()
         $upnOverride = "$($row.Cells['Upn'].Value)".Trim()
         $title = "$($row.Cells['JobTitle'].Value)".Trim()
+        $managerRaw = if ($mode -eq "Domestic") { "$($row.Cells['Manager'].Value)".Trim() } else { "" }
         $licRaw = "$($row.Cells['License'].Value)".Trim()
         $country = if ($mode -eq "Global") { "$($row.Cells['Country'].Value)".Trim() } else { "US" }
         $ent = "$($row.Cells['EntApps'].Value)".Trim()
@@ -694,6 +712,26 @@ $btnRunImport.Add_Click({
         catch { & $recordStatus "FAILED creating user: $($_.Exception.Message)"; continue }
 
         $notes = @("Created")
+
+        if ($managerRaw) {
+            $mgr = $null
+            try { $mgr = Get-MgUser -UserId $managerRaw -Property Id, DisplayName -ErrorAction Stop } catch { $mgr = $null }
+            if (-not $mgr) {
+                try { $mgr = Get-MgUser -Filter "DisplayName eq '$managerRaw'" -Property Id, DisplayName -ErrorAction SilentlyContinue | Select-Object -First 1 } catch { $mgr = $null }
+            }
+            if ($mgr) {
+                try {
+                    $mgrRef = @{ "@odata.id" = "https://graph.microsoft.com/v1.0/users/$($mgr.Id)" }
+                    Set-MgUserManagerByRef -UserId $upn -BodyParameter $mgrRef -ErrorAction Stop
+                    $notes += "Manager set: $($mgr.DisplayName)"
+                } catch {
+                    $notes += "Manager assignment FAILED: $($_.Exception.Message)"
+                }
+            } else {
+                $notes += "Manager not found: '$managerRaw'"
+            }
+        }
+
         try {
             switch ($tier) {
                 "F3"  { Set-MgUserLicense -UserId $upn -AddLicenses @{SkuId=$skus.F3.SkuId} -RemoveLicenses @() -ErrorAction Stop; $notes += "F3" }
@@ -799,14 +837,20 @@ $btnRunImport.Add_Click({
     # Skipped entirely for Global/India batches. Only fires for users that
     # were actually created above (skipped/failed rows are excluded since
     # they were never added to $created).
+    $externalInviteSummary = $null
     if ($mode -eq "Domestic" -and $created.Count -gt 0) {
         $lblProgress.Text = "Connecting to external tenant for guest invitations..."; [System.Windows.Forms.Application]::DoEvents()
         $extConnectOk = $true
         try {
             Disconnect-MgGraph -ErrorAction SilentlyContinue | Out-Null
             Connect-MgGraph -TenantId $externalTenantId -Scopes "User.Invite.All", "User.ReadWrite.All" -NoWelcome -ErrorAction Stop
+            $actualTenantId = (Get-MgContext).TenantId
+            if ($actualTenantId -ne $externalTenantId) {
+                throw "Connected, but the active Graph context is tenant '$actualTenantId', not the expected external tenant '$externalTenantId'. This usually means a cached sign-in session was reused instead of switching tenants."
+            }
         } catch {
             $extConnectOk = $false
+            $externalInviteSummary = "External tenant sign-in FAILED - no users were invited externally. See the warning shown earlier for details."
             [System.Windows.Forms.MessageBox]::Show(
                 "Could not sign in to the external tenant for guest invitations:`n`n$($_.Exception.Message)`n`nAll users above were still created in your home tenant. None of them were invited externally - you can invite them manually, or fix sign-in and re-run.",
                 "External invite sign-in failed", "OK", "Warning") | Out-Null
@@ -814,6 +858,8 @@ $btnRunImport.Add_Click({
 
         if ($extConnectOk) {
             $invited = 0
+            $inviteSucceeded = 0
+            $inviteFailed = 0
             foreach ($c in $created) {
                 $lblProgress.Text = "Inviting external guest... ($invited of $($created.Count))"; [System.Windows.Forms.Application]::DoEvents()
                 $fullName = "$($c.FirstName) $($c.LastName)".Trim()
@@ -826,6 +872,7 @@ $btnRunImport.Add_Click({
                         -InviteRedirectUrl $externalInviteRedirectUrl `
                         -ErrorAction Stop
                     $c.Notes += "External invite sent"
+                    $inviteSucceeded++
 
                     try {
                         Update-MgUser -UserId $inv.InvitedUser.Id -GivenName $c.FirstName -Surname $c.LastName -JobTitle $c.JobTitle -ErrorAction Stop
@@ -835,6 +882,7 @@ $btnRunImport.Add_Click({
                     }
                 } catch {
                     $c.Notes += "External invite FAILED: $($_.Exception.Message)"
+                    $inviteFailed++
                 }
 
                 $c.Row.Cells["Status"].Value = ($c.Notes -join " | ")
@@ -842,6 +890,7 @@ $btnRunImport.Add_Click({
                 $invited++
             }
             $lblProgress.Text = "Done - $invited external invite(s) processed."
+            $externalInviteSummary = "External tenant invites: $inviteSucceeded succeeded, $inviteFailed failed (out of $($created.Count))."
 
             # Switch back to the home tenant so the rest of this run (results
             # export) and any later "Run import" click in this same session
@@ -858,11 +907,15 @@ $btnRunImport.Add_Click({
     }
 
     $form.Cursor = [System.Windows.Forms.Cursors]::Default; $btnRunImport.Enabled = $true
-    $resultsPath = Join-Path $scriptDir "UserProvisioning_Results_$timestamp.csv"
+    $resultsPath = Join-Path $scriptDir "UserProvisioning_Results_$runTimestamp.csv"
     try { $results | Export-Csv -Path $resultsPath -NoTypeInformation -ErrorAction Stop; $exportNote = "Results + credentials saved to:`n$resultsPath" }
     catch { $exportNote = "Could not save results file: $($_.Exception.Message)" }
+    $script:lastResults = $results
+    $script:lastResultsPath = $resultsPath
     $pwdSummary = if ($passwordMode -eq "Shared") { "Shared password: $sharedPwd" } else { "Each user got a unique password - see the results file." }
-    [System.Windows.Forms.MessageBox]::Show("Import finished. See the Status column for per-user results.`n`n$pwdSummary`n`n$exportNote", "Import complete", "OK", "Information") | Out-Null
+    $finalMsg = "Import finished. See the Status column for per-user results.`n`n$pwdSummary`n`n$exportNote"
+    if ($externalInviteSummary) { $finalMsg += "`n`n$externalInviteSummary" }
+    [System.Windows.Forms.MessageBox]::Show($finalMsg, "Import complete", "OK", "Information") | Out-Null
 })
 
 # ============================================================

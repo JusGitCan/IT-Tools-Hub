@@ -115,6 +115,14 @@ a bigger mailbox for Global:
 Both modes share the same base SKUs; only the add-on for the "+" tier differs
 (Apps for Enterprise in Domestic, Exchange archiving in Global).
 
+### Manager
+
+The **Manager** column (Domestic mode only) sets the new user's manager in
+Entra ID. Enter the manager's UPN/email (preferred - most reliable) or their
+exact display name as a fallback. If the manager can't be found, the account
+is still created and the row's Status notes it so you can set the manager
+manually.
+
 ### Groups
 
 The **Groups** column accepts a comma-separated list, so a user can be added
@@ -199,6 +207,13 @@ Each run writes two timestamped files next to the script:
 - `UserProvisioning_<timestamp>.txt` — a transcript of the run.
 - `UserProvisioning_Results_<timestamp>.csv` — one row per user with the
   generated password and the per-user status.
+
+Each click of **Run import** gets its own uniquely timestamped results file,
+even within the same open wizard session - earlier runs are never
+overwritten. If a results file ever fails to save (for example because a
+previous copy is still open in Excel), use the **Re-export last results**
+toolbar button to write the last run's results out again under a new
+filename, without needing to re-run the import.
 
 > **The results CSV contains plaintext temporary passwords.** Treat it as
 > sensitive: move or delete it once credentials have been handed off, and do
