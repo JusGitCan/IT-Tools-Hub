@@ -192,8 +192,8 @@ The tool is deliberately conservative:
 - A **group that can't be found** or a **license that fails to assign** does not
   fail the user — the account is still created and the issue is noted in Status.
 - **Passwords** are auto-generated uniquely per user (16 characters), or a
-  single shared password can be chosen at launch. Users must change the
-  password at first sign-in.
+  single shared password can be chosen at launch. The password is set as-is
+  and is not forced to change at first sign-in.
 - After creating users, the tool **waits for each mailbox to provision**
   (polling, with a 5-minute safety timeout) before adding groups or enabling
   archiving, rather than a fixed blind wait.

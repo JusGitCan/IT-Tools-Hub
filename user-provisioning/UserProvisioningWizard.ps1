@@ -625,9 +625,10 @@ function Get-UpnParts($firstName, $lastName) {
     return @{ DisplayName = "$($firstName.Trim()) $($lastName.Trim())"; MailNickname = "$fn.$ln"; Upn = "$fn.$ln@corrohealth.com" }
 }
 function Add-UserToGroupOrList($upn, $userOid, $groupName) {
-    $group = Get-MgGroup -Filter "DisplayName eq '$groupName'" -ErrorAction SilentlyContinue
+    $group = Get-MgGroup -Filter "DisplayName eq '$groupName'" -Property Id, DisplayName, Mail, GroupTypes -ErrorAction SilentlyContinue
     if (-not $group) { return "Group not found: $groupName" }
-    if ($group.Mail -like "*corrohealth.com*") {
+    $isUnified = $group.GroupTypes -contains "Unified"
+    if ($group.Mail -like "*corrohealth.com*" -and -not $isUnified) {
         try { Add-DistributionGroupMember -Identity $group.DisplayName -Member $upn -BypassSecurityGroupManagerCheck -ErrorAction Stop; return "Added to $groupName (Exchange)" }
         catch { return "Failed adding to $($groupName): $($_.Exception.Message)" }
     } else {
@@ -699,7 +700,7 @@ $btnRunImport.Add_Click({
             & $recordStatus "Skipped - already exists ($state)"; continue
         }
 
-        $pwProfile = @{ Password = $userPwd; ForceChangePasswordNextSignIn = $true }
+        $pwProfile = @{ Password = $userPwd; ForceChangePasswordNextSignIn = $false }
         $mailNickname = ($upn -split "@")[0]
         $newParams = @{ GivenName=$fn; Surname=$ln; DisplayName=$parts.DisplayName; AccountEnabled=$true; UserPrincipalName=$upn; MailNickname=$mailNickname; PasswordProfile=$pwProfile; UsageLocation=$country; JobTitle=$title }
         if ($country) { $newParams["Country"] = $country }
@@ -774,11 +775,19 @@ $btnRunImport.Add_Click({
             # Entra security groups. Exchange distribution membership, archiving,
             # and the subcontractor attribute all require the mailbox to exist;
             # Entra security-group adds and licensing do not.
+            #
+            # Note: a mail address alone doesn't mean "use Exchange" - Microsoft
+            # 365 Groups (SharePoint site membership, Teams) also carry a
+            # corrohealth.com address but Exchange's Add-DistributionGroupMember
+            # rejects them outright. Only classic distribution lists / mail-
+            # enabled security groups go through Exchange; Unified (M365) groups
+            # go through Graph like a plain security group.
             $resolved = @()
             $needsMailbox = $false
             foreach ($g in $groupNames) {
-                $grp = Get-MgGroup -Filter "DisplayName eq '$g'" -ErrorAction SilentlyContinue
-                $isExchange = ($grp -and ($grp.Mail -like "*corrohealth.com*"))
+                $grp = Get-MgGroup -Filter "DisplayName eq '$g'" -Property Id, DisplayName, Mail, GroupTypes -ErrorAction SilentlyContinue
+                $isUnified = $grp -and ($grp.GroupTypes -contains "Unified")
+                $isExchange = ($grp -and ($grp.Mail -like "*corrohealth.com*") -and -not $isUnified)
                 if ($isExchange) { $needsMailbox = $true }
                 $resolved += [PSCustomObject]@{ Name = $g; Group = $grp; IsExchange = $isExchange }
             }
