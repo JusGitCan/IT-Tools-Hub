@@ -117,22 +117,10 @@ function Set-DarkForm { param($FormObj) $FormObj.BackColor = $themeBg; $FormObj.
 # ============================================================
 #  Valid values + license/size mapping
 # ============================================================
-$validLicenses  = @("F3", "F3+", "E3")
+$validLicenses  = @("F3", "F3+", "E3", "E5")
 $validSizes     = @("2GB", "50GB", "E3")
 $validCountries = @("US", "IN")
 $validYesNo     = @("N", "Y")
-
-# ============================================================
-#  External tenant B2B guest invitation (Domestic mode only)
-# ============================================================
-# After a Domestic-mode batch finishes creating users in the home tenant,
-# each newly created user is also invited as a B2B guest into this external
-# tenant, using the same UPN as the invited email address. This mirrors the
-# Entra "Invite external user (Preview)" flow: Basics (email/display name,
-# invite message unchecked) + Properties (first/last name, job title). No
-# groups or roles are assigned in the external tenant.
-$externalTenantId          = "10096675-b04b-4d53-88e6-9c640623b9ea"
-$externalInviteRedirectUrl = "https://myapplications.microsoft.com/"
 
 function Resolve-LicenseTier {
     param([string]$Value)
@@ -144,6 +132,7 @@ function Resolve-LicenseTier {
         "50GB"  { return "F3+" }
         "50 GB" { return "F3+" }
         "E3"    { return "E3" }
+        "E5"    { return "E5" }
         default { return $null }
     }
 }
@@ -211,9 +200,6 @@ try {
     [System.Windows.Forms.MessageBox]::Show("Could not connect to Microsoft Graph:`n`n$($_.Exception.Message)", "Graph sign-in failed", "OK", "Error") | Out-Null
     exit
 }
-# Remembered so the script can switch to the external tenant for guest
-# invitations later and then reconnect back to the home tenant afterward.
-$homeTenantId = (Get-MgContext).TenantId
 try {
     Connect-ExchangeOnline -ShowBanner:$false -ErrorAction Stop
 } catch {
@@ -230,6 +216,7 @@ function Get-LicenseSkus {
     return @{
         F3      = Get-MgSubscribedSku | Where-Object { $_.SkuPartNumber -eq "SPE_F1" }
         E3      = Get-MgSubscribedSku | Where-Object { $_.SkuPartNumber -eq "SPE_E3" }
+        E5      = Get-MgSubscribedSku | Where-Object { $_.SkuPartNumber -eq "SPE_E5" }
         Archive = Get-MgSubscribedSku | Where-Object { $_.SkuPartNumber -eq "EXCHANGEARCHIVE_ADDON" }
         Apps    = Get-MgSubscribedSku | Where-Object { $_.SkuPartNumber -eq "OFFICESUBSCRIPTION" }
     }
@@ -297,8 +284,7 @@ $btnUploadCsv      = New-ToolButton "Upload CSV" 95
 $btnRemoveSelected = New-ToolButton "Remove selected" 115
 $btnSelectAll      = New-ToolButton "Select all" 85
 $btnLicenseRef     = New-ToolButton "License reference" 120
-$btnExportResults  = New-ToolButton "Re-export last results" 150
-$toolbar.Controls.AddRange([System.Windows.Forms.Control[]]@($btnAddRow, $btnUserCreation, $btnUploadCsv, $btnRemoveSelected, $btnSelectAll, $btnLicenseRef, $btnExportResults))
+$toolbar.Controls.AddRange([System.Windows.Forms.Control[]]@($btnAddRow, $btnUserCreation, $btnUploadCsv, $btnRemoveSelected, $btnSelectAll, $btnLicenseRef))
 
 # ---- Grid ----
 $grid = New-Object System.Windows.Forms.DataGridView
@@ -358,7 +344,7 @@ function Get-HeaderText($colName, $mode) {
         "LastName"          { return "Last name" }
         "Upn"               { return "Username" }
         "JobTitle"          { return "Job title" }
-        "Manager"           { return "Manager (UPN/email)" }
+        "Manager"           { return "Manager" }
         "License"           { if ($mode -eq "Global") { return "Mailbox size" } else { return "License" } }
         "EntApps"           { return "EntApps" }
         "Country"           { return "Country" }
@@ -390,29 +376,53 @@ function Rebuild-HeaderBar($mode) {
 }
 $grid.Add_Scroll({ Rebuild-HeaderBar $script:currentMode })
 
+# Allow pasting directly into whatever cell is selected, without needing to
+# double-click/F2 into edit mode first (plain DataGridView requires edit mode
+# for Ctrl+V by default). Read-only and combo-box cells are skipped.
+$grid.Add_KeyDown({
+    param($sender, $e)
+    if ($e.Control -and $e.KeyCode -eq "V") {
+        if (-not [System.Windows.Forms.Clipboard]::ContainsText()) { return }
+        $clip = [System.Windows.Forms.Clipboard]::GetText()
+        $cell = $grid.CurrentCell
+        if ($cell -and -not $cell.ReadOnly -and $cell -isnot [System.Windows.Forms.DataGridViewComboBoxCell]) {
+            # Take only the first line/field if multi-line or tab-separated
+            # clipboard content was pasted, so a single cell doesn't end up
+            # with an entire copied block of text jammed into it.
+            $firstToken = ($clip -split "[\r\n\t]")[0]
+            $cell.Value = $firstToken
+            $e.Handled = $true
+            $e.SuppressKeyPress = $true
+        }
+    }
+})
+
 # ---- Bulk apply panel ----
 $bulkPanel = New-Object System.Windows.Forms.Panel
 $bulkPanel.Dock = "Bottom"; $bulkPanel.Height = 60; $bulkPanel.Padding = New-Object System.Windows.Forms.Padding(8); $bulkPanel.BackColor = $themePanel
 $lblApply = New-Object System.Windows.Forms.Label
 $lblApply.Text = "Apply to selected rows:"; $lblApply.AutoSize = $true; $lblApply.Location = New-Object System.Drawing.Point(8, 8); $lblApply.ForeColor = $themeText
 $bulkLicense = New-Object System.Windows.Forms.ComboBox
-$bulkLicense.DropDownStyle = "DropDownList"; $bulkLicense.Location = New-Object System.Drawing.Point(8, 28); $bulkLicense.Width = 110
+$bulkLicense.DropDownStyle = "DropDownList"; $bulkLicense.Location = New-Object System.Drawing.Point(8, 28); $bulkLicense.Width = 100
 $bulkLicense.BackColor = $themeControl; $bulkLicense.ForeColor = $themeText; $bulkLicense.FlatStyle = "Flat"
 $bulkCountry = New-Object System.Windows.Forms.ComboBox
-$bulkCountry.DropDownStyle = "DropDownList"; $bulkCountry.Location = New-Object System.Drawing.Point(126, 28); $bulkCountry.Width = 90
+$bulkCountry.DropDownStyle = "DropDownList"; $bulkCountry.Location = New-Object System.Drawing.Point(116, 28); $bulkCountry.Width = 80
 $bulkCountry.BackColor = $themeControl; $bulkCountry.ForeColor = $themeText; $bulkCountry.FlatStyle = "Flat"
 $bulkCountry.Items.AddRange(@("(no change)") + $validCountries); $bulkCountry.SelectedIndex = 0
 $bulkTitle = New-Object System.Windows.Forms.TextBox
-$bulkTitle.Location = New-Object System.Drawing.Point(224, 28); $bulkTitle.Width = 150
+$bulkTitle.Location = New-Object System.Drawing.Point(204, 28); $bulkTitle.Width = 130
 $bulkTitle.BackColor = $themeControl; $bulkTitle.BorderStyle = "FixedSingle"; $bulkTitle.ForeColor = $themeTextMuted; $bulkTitle.Text = "Job title (blank = no change)"
+$bulkManager = New-Object System.Windows.Forms.TextBox
+$bulkManager.Location = New-Object System.Drawing.Point(342, 28); $bulkManager.Width = 140
+$bulkManager.BackColor = $themeControl; $bulkManager.BorderStyle = "FixedSingle"; $bulkManager.ForeColor = $themeTextMuted; $bulkManager.Text = "Manager (blank = no change)"
 $bulkGroups = New-Object System.Windows.Forms.TextBox
-$bulkGroups.Location = New-Object System.Drawing.Point(382, 28); $bulkGroups.Width = 200
+$bulkGroups.Location = New-Object System.Drawing.Point(490, 28); $bulkGroups.Width = 170
 $bulkGroups.BackColor = $themeControl; $bulkGroups.BorderStyle = "FixedSingle"; $bulkGroups.ForeColor = $themeTextMuted; $bulkGroups.Text = "Groups (blank = no change)"
 $btnApplySelected = New-Object System.Windows.Forms.Button
-$btnApplySelected.Text = "Apply to selected"; $btnApplySelected.Location = New-Object System.Drawing.Point(590, 27); $btnApplySelected.Width = 130
+$btnApplySelected.Text = "Apply to selected"; $btnApplySelected.Location = New-Object System.Drawing.Point(668, 27); $btnApplySelected.Width = 130
 Set-DarkButton $btnApplySelected
-$bulkPanel.Controls.AddRange([System.Windows.Forms.Control[]]@($lblApply, $bulkLicense, $bulkCountry, $bulkTitle, $bulkGroups, $btnApplySelected))
-foreach ($tb in @($bulkTitle, $bulkGroups)) {
+$bulkPanel.Controls.AddRange([System.Windows.Forms.Control[]]@($lblApply, $bulkLicense, $bulkCountry, $bulkTitle, $bulkManager, $bulkGroups, $btnApplySelected))
+foreach ($tb in @($bulkTitle, $bulkManager, $bulkGroups)) {
     $tb.Add_Enter({ if ($this.ForeColor -eq $themeTextMuted) { $this.Text = ""; $this.ForeColor = $themeText } })
 }
 
@@ -442,7 +452,7 @@ $form.Controls.Add($brandBar)
 # ============================================================
 $script:currentMode = "Domestic"
 $domesticCols = @("Include","FirstName","LastName","Upn","JobTitle","Manager","License","Groups","Status","Delete")
-$globalCols   = @("Include","FirstName","LastName","Upn","JobTitle","License","EntApps","Country","InternalEmailOnly","Subcontractor","City","Province","Office","Status","Delete")
+$globalCols   = @("Include","FirstName","LastName","Upn","JobTitle","Manager","License","EntApps","Country","InternalEmailOnly","Subcontractor","City","Province","Office","Status","Delete")
 
 function Set-Mode($mode) {
     $script:currentMode = $mode
@@ -514,19 +524,6 @@ $btnLicenseRef.Add_Click({
     $msg = "Mailbox size  ->  License granted`n`n2GB   ->  F3`n50GB  ->  F3 + Exchange Archive (F3+)`nE3    ->  E3 (full desktop Office)`n`nEntApps = Y adds Microsoft 365 Apps for Enterprise on top of any of the above."
     [System.Windows.Forms.MessageBox]::Show($msg, "License reference", "OK", "Information") | Out-Null
 })
-$btnExportResults.Add_Click({
-    if (-not $script:lastResults -or $script:lastResults.Count -eq 0) {
-        [System.Windows.Forms.MessageBox]::Show("No import has been run yet in this session, so there's nothing to export.", "Nothing to export", "OK", "Information") | Out-Null
-        return
-    }
-    $reExportPath = Join-Path $scriptDir "UserProvisioning_Results_$(Get-Date -Format 'yyyyMMdd_HHmmss_fff')_reexport.csv"
-    try {
-        $script:lastResults | Export-Csv -Path $reExportPath -NoTypeInformation -ErrorAction Stop
-        [System.Windows.Forms.MessageBox]::Show("Last run's results (from $script:lastResultsPath) re-exported to:`n`n$reExportPath", "Re-export complete", "OK", "Information") | Out-Null
-    } catch {
-        [System.Windows.Forms.MessageBox]::Show("Could not re-export results:`n`n$($_.Exception.Message)", "Re-export failed", "OK", "Error") | Out-Null
-    }
-})
 
 # ---- User creation (paste names) ----
 $btnUserCreation.Add_Click({
@@ -568,6 +565,7 @@ function Import-Rows($rows) {
         $row.Cells["LastName"].Value  = ("$($r.LastName)").Trim()
         $upn = ("$($r.UserPrincipalName)").Trim(); if ($upn) { $row.Cells["Upn"].Value = $upn }
         $row.Cells["JobTitle"].Value = ("$($r.Designation)").Trim()
+        $row.Cells["Manager"].Value = ("$($r.Manager)").Trim()
         $rawLic = ("$($r.LicenseCode)$($r.RequiredMailboxSize)").Trim()
         $tier = Resolve-LicenseTier $rawLic
         if ($tier) {
@@ -605,6 +603,7 @@ $btnApplySelected.Add_Click({
             if ($bulkLicense.SelectedItem -and $bulkLicense.SelectedItem -ne "(no change)") { $row.Cells["License"].Value = $bulkLicense.SelectedItem }
             if ($script:currentMode -eq "Global" -and $bulkCountry.SelectedItem -and $bulkCountry.SelectedItem -ne "(no change)") { $row.Cells["Country"].Value = $bulkCountry.SelectedItem }
             if ($bulkTitle.Text -and $bulkTitle.ForeColor -ne $themeTextMuted) { $row.Cells["JobTitle"].Value = $bulkTitle.Text }
+            if ($bulkManager.Text -and $bulkManager.ForeColor -ne $themeTextMuted) { $row.Cells["Manager"].Value = $bulkManager.Text }
             if ($bulkGroups.Text -and $bulkGroups.ForeColor -ne $themeTextMuted) { $row.Cells["Groups"].Value = $bulkGroups.Text }
         }
     }
@@ -625,10 +624,9 @@ function Get-UpnParts($firstName, $lastName) {
     return @{ DisplayName = "$($firstName.Trim()) $($lastName.Trim())"; MailNickname = "$fn.$ln"; Upn = "$fn.$ln@corrohealth.com" }
 }
 function Add-UserToGroupOrList($upn, $userOid, $groupName) {
-    $group = Get-MgGroup -Filter "DisplayName eq '$groupName'" -Property Id, DisplayName, Mail, GroupTypes -ErrorAction SilentlyContinue
+    $group = Get-MgGroup -Filter "DisplayName eq '$groupName'" -ErrorAction SilentlyContinue
     if (-not $group) { return "Group not found: $groupName" }
-    $isUnified = $group.GroupTypes -contains "Unified"
-    if ($group.Mail -like "*corrohealth.com*" -and -not $isUnified) {
+    if ($group.Mail -like "*corrohealth.com*") {
         try { Add-DistributionGroupMember -Identity $group.DisplayName -Member $upn -BypassSecurityGroupManagerCheck -ErrorAction Stop; return "Added to $groupName (Exchange)" }
         catch { return "Failed adding to $($groupName): $($_.Exception.Message)" }
     } else {
@@ -650,7 +648,6 @@ function Wait-ForMailbox($upn, $timeoutSeconds = 300, $intervalSeconds = 15) {
 # ============================================================
 $btnRunImport.Add_Click({
     $mode = $script:currentMode
-    $runTimestamp = Get-Date -Format "yyyyMMdd_HHmmss_fff"
     $rowsToProcess = @()
     foreach ($row in $grid.Rows) { if ($row.Cells["Include"].Value -eq $true) { $rowsToProcess += $row } }
     if ($rowsToProcess.Count -eq 0) { [System.Windows.Forms.MessageBox]::Show("No rows selected to import.", "Nothing to run", "OK", "Information") | Out-Null; return }
@@ -667,7 +664,7 @@ $btnRunImport.Add_Click({
         $ln = "$($row.Cells['LastName'].Value)".Trim()
         $upnOverride = "$($row.Cells['Upn'].Value)".Trim()
         $title = "$($row.Cells['JobTitle'].Value)".Trim()
-        $managerRaw = if ($mode -eq "Domestic") { "$($row.Cells['Manager'].Value)".Trim() } else { "" }
+        $managerRaw = "$($row.Cells['Manager'].Value)".Trim()
         $licRaw = "$($row.Cells['License'].Value)".Trim()
         $country = if ($mode -eq "Global") { "$($row.Cells['Country'].Value)".Trim() } else { "US" }
         $ent = "$($row.Cells['EntApps'].Value)".Trim()
@@ -685,7 +682,7 @@ $btnRunImport.Add_Click({
 
         $recordStatus = {
             param($status)
-            [void]$results.Add([PSCustomObject]@{ FirstName=$fn; LastName=$ln; UserPrincipalName=$upn; Password=$userPwd; LicenseTier=$tier; Country=$country; Groups=$groupsRaw; Status=$status })
+            [void]$results.Add([PSCustomObject]@{ FirstName=$fn; LastName=$ln; UserPrincipalName=$upn; Password=$userPwd; LicenseTier=$tier; Country=$country; Manager=$managerRaw; Groups=$groupsRaw; Status=$status })
             $row.Cells["Status"].Value = $status
         }
 
@@ -700,7 +697,7 @@ $btnRunImport.Add_Click({
             & $recordStatus "Skipped - already exists ($state)"; continue
         }
 
-        $pwProfile = @{ Password = $userPwd; ForceChangePasswordNextSignIn = $false }
+        $pwProfile = @{ Password = $userPwd; ForceChangePasswordNextSignIn = $true }
         $mailNickname = ($upn -split "@")[0]
         $newParams = @{ GivenName=$fn; Surname=$ln; DisplayName=$parts.DisplayName; AccountEnabled=$true; UserPrincipalName=$upn; MailNickname=$mailNickname; PasswordProfile=$pwProfile; UsageLocation=$country; JobTitle=$title }
         if ($country) { $newParams["Country"] = $country }
@@ -715,21 +712,12 @@ $btnRunImport.Add_Click({
         $notes = @("Created")
 
         if ($managerRaw) {
-            $mgr = $null
-            try { $mgr = Get-MgUser -UserId $managerRaw -Property Id, DisplayName -ErrorAction Stop } catch { $mgr = $null }
-            if (-not $mgr) {
-                try { $mgr = Get-MgUser -Filter "DisplayName eq '$managerRaw'" -Property Id, DisplayName -ErrorAction SilentlyContinue | Select-Object -First 1 } catch { $mgr = $null }
-            }
-            if ($mgr) {
-                try {
-                    $mgrRef = @{ "@odata.id" = "https://graph.microsoft.com/v1.0/users/$($mgr.Id)" }
-                    Set-MgUserManagerByRef -UserId $upn -BodyParameter $mgrRef -ErrorAction Stop
-                    $notes += "Manager set: $($mgr.DisplayName)"
-                } catch {
-                    $notes += "Manager assignment FAILED: $($_.Exception.Message)"
-                }
-            } else {
-                $notes += "Manager not found: '$managerRaw'"
+            try {
+                $managerRef = @{ "@odata.id" = "https://graph.microsoft.com/v1.0/users/$managerRaw" }
+                Set-MgUserManagerByRef -UserId $upn -BodyParameter $managerRef -ErrorAction Stop
+                $notes += "Manager set ($managerRaw)"
+            } catch {
+                $notes += "Manager FAILED: $($_.Exception.Message)"
             }
         }
 
@@ -749,12 +737,13 @@ $btnRunImport.Add_Click({
                     }
                 }
                 "E3"  { Set-MgUserLicense -UserId $upn -AddLicenses @{SkuId=$skus.E3.SkuId} -RemoveLicenses @() -ErrorAction Stop; $notes += "E3" }
+                "E5"  { Set-MgUserLicense -UserId $upn -AddLicenses @{SkuId=$skus.E5.SkuId} -RemoveLicenses @() -ErrorAction Stop; $notes += "E5" }
             }
             if ($ent -match "(?i)^y") { Set-MgUserLicense -UserId $upn -AddLicenses @{SkuId=$skus.Apps.SkuId} -RemoveLicenses @() -ErrorAction Stop; $notes += "Apps" }
         } catch { $notes += "License FAILED: $($_.Exception.Message)" }
 
         & $recordStatus ($notes -join " | ")
-        $created += [PSCustomObject]@{ Row=$row; Upn=$upn; Oid=$userOid; Tier=$tier; Subcon=$subcon; Internal=$internal; GroupsRaw=$groupsRaw; Notes=$notes; Country=$country; FirstName=$fn; LastName=$ln; JobTitle=$title }
+        $created += [PSCustomObject]@{ Row=$row; Upn=$upn; Oid=$userOid; Tier=$tier; Subcon=$subcon; Internal=$internal; GroupsRaw=$groupsRaw; Notes=$notes; Country=$country }
     }
 
     if ($created.Count -gt 0) {
@@ -775,19 +764,11 @@ $btnRunImport.Add_Click({
             # Entra security groups. Exchange distribution membership, archiving,
             # and the subcontractor attribute all require the mailbox to exist;
             # Entra security-group adds and licensing do not.
-            #
-            # Note: a mail address alone doesn't mean "use Exchange" - Microsoft
-            # 365 Groups (SharePoint site membership, Teams) also carry a
-            # corrohealth.com address but Exchange's Add-DistributionGroupMember
-            # rejects them outright. Only classic distribution lists / mail-
-            # enabled security groups go through Exchange; Unified (M365) groups
-            # go through Graph like a plain security group.
             $resolved = @()
             $needsMailbox = $false
             foreach ($g in $groupNames) {
-                $grp = Get-MgGroup -Filter "DisplayName eq '$g'" -Property Id, DisplayName, Mail, GroupTypes -ErrorAction SilentlyContinue
-                $isUnified = $grp -and ($grp.GroupTypes -contains "Unified")
-                $isExchange = ($grp -and ($grp.Mail -like "*corrohealth.com*") -and -not $isUnified)
+                $grp = Get-MgGroup -Filter "DisplayName eq '$g'" -ErrorAction SilentlyContinue
+                $isExchange = ($grp -and ($grp.Mail -like "*corrohealth.com*"))
                 if ($isExchange) { $needsMailbox = $true }
                 $resolved += [PSCustomObject]@{ Name = $g; Group = $grp; IsExchange = $isExchange }
             }
@@ -832,7 +813,6 @@ $btnRunImport.Add_Click({
                 if (-not $ok) { $notes += "Mailbox not ready within timeout - some Exchange steps may be incomplete" }
             }
 
-            $c.Notes = $notes
             $c.Row.Cells["Status"].Value = ($notes -join " | ")
             foreach ($res in $results) { if ($res.UserPrincipalName -eq $c.Upn) { $res.Status = ($notes -join " | ") } }
             $ready++
@@ -840,91 +820,12 @@ $btnRunImport.Add_Click({
         $lblProgress.Text = "Done - $ready user(s) processed."
     }
 
-    # ============================================================
-    #  External tenant B2B guest invitation (Domestic mode only)
-    # ============================================================
-    # Skipped entirely for Global/India batches. Only fires for users that
-    # were actually created above (skipped/failed rows are excluded since
-    # they were never added to $created).
-    $externalInviteSummary = $null
-    if ($mode -eq "Domestic" -and $created.Count -gt 0) {
-        $lblProgress.Text = "Connecting to external tenant for guest invitations..."; [System.Windows.Forms.Application]::DoEvents()
-        $extConnectOk = $true
-        try {
-            Disconnect-MgGraph -ErrorAction SilentlyContinue | Out-Null
-            Connect-MgGraph -TenantId $externalTenantId -Scopes "User.Invite.All", "User.ReadWrite.All" -NoWelcome -ErrorAction Stop
-            $actualTenantId = (Get-MgContext).TenantId
-            if ($actualTenantId -ne $externalTenantId) {
-                throw "Connected, but the active Graph context is tenant '$actualTenantId', not the expected external tenant '$externalTenantId'. This usually means a cached sign-in session was reused instead of switching tenants."
-            }
-        } catch {
-            $extConnectOk = $false
-            $externalInviteSummary = "External tenant sign-in FAILED - no users were invited externally. See the warning shown earlier for details."
-            [System.Windows.Forms.MessageBox]::Show(
-                "Could not sign in to the external tenant for guest invitations:`n`n$($_.Exception.Message)`n`nAll users above were still created in your home tenant. None of them were invited externally - you can invite them manually, or fix sign-in and re-run.",
-                "External invite sign-in failed", "OK", "Warning") | Out-Null
-        }
-
-        if ($extConnectOk) {
-            $invited = 0
-            $inviteSucceeded = 0
-            $inviteFailed = 0
-            foreach ($c in $created) {
-                $lblProgress.Text = "Inviting external guest... ($invited of $($created.Count))"; [System.Windows.Forms.Application]::DoEvents()
-                $fullName = "$($c.FirstName) $($c.LastName)".Trim()
-
-                try {
-                    $inv = New-MgInvitation `
-                        -InvitedUserEmailAddress $c.Upn `
-                        -InvitedUserDisplayName $fullName `
-                        -SendInvitationMessage:$false `
-                        -InviteRedirectUrl $externalInviteRedirectUrl `
-                        -ErrorAction Stop
-                    $c.Notes += "External invite sent"
-                    $inviteSucceeded++
-
-                    try {
-                        Update-MgUser -UserId $inv.InvitedUser.Id -GivenName $c.FirstName -Surname $c.LastName -JobTitle $c.JobTitle -ErrorAction Stop
-                        $c.Notes += "External profile set (name/title)"
-                    } catch {
-                        $c.Notes += "External profile update FAILED: $($_.Exception.Message)"
-                    }
-                } catch {
-                    $c.Notes += "External invite FAILED: $($_.Exception.Message)"
-                    $inviteFailed++
-                }
-
-                $c.Row.Cells["Status"].Value = ($c.Notes -join " | ")
-                foreach ($res in $results) { if ($res.UserPrincipalName -eq $c.Upn) { $res.Status = ($c.Notes -join " | ") } }
-                $invited++
-            }
-            $lblProgress.Text = "Done - $invited external invite(s) processed."
-            $externalInviteSummary = "External tenant invites: $inviteSucceeded succeeded, $inviteFailed failed (out of $($created.Count))."
-
-            # Switch back to the home tenant so the rest of this run (results
-            # export) and any later "Run import" click in this same session
-            # still talk to the right tenant.
-            try {
-                Disconnect-MgGraph -ErrorAction SilentlyContinue | Out-Null
-                Connect-MgGraph -TenantId $homeTenantId -Scopes "User.ReadWrite.All", "Group.ReadWrite.All" -NoWelcome -ErrorAction Stop
-            } catch {
-                [System.Windows.Forms.MessageBox]::Show(
-                    "External invitations finished, but reconnecting to your home tenant afterward failed:`n`n$($_.Exception.Message)`n`nIf you run another import in this session, you may be prompted to sign in again.",
-                    "Reconnect to home tenant failed", "OK", "Warning") | Out-Null
-            }
-        }
-    }
-
     $form.Cursor = [System.Windows.Forms.Cursors]::Default; $btnRunImport.Enabled = $true
-    $resultsPath = Join-Path $scriptDir "UserProvisioning_Results_$runTimestamp.csv"
+    $resultsPath = Join-Path $scriptDir "UserProvisioning_Results_$timestamp.csv"
     try { $results | Export-Csv -Path $resultsPath -NoTypeInformation -ErrorAction Stop; $exportNote = "Results + credentials saved to:`n$resultsPath" }
     catch { $exportNote = "Could not save results file: $($_.Exception.Message)" }
-    $script:lastResults = $results
-    $script:lastResultsPath = $resultsPath
     $pwdSummary = if ($passwordMode -eq "Shared") { "Shared password: $sharedPwd" } else { "Each user got a unique password - see the results file." }
-    $finalMsg = "Import finished. See the Status column for per-user results.`n`n$pwdSummary`n`n$exportNote"
-    if ($externalInviteSummary) { $finalMsg += "`n`n$externalInviteSummary" }
-    [System.Windows.Forms.MessageBox]::Show($finalMsg, "Import complete", "OK", "Information") | Out-Null
+    [System.Windows.Forms.MessageBox]::Show("Import finished. See the Status column for per-user results.`n`n$pwdSummary`n`n$exportNote", "Import complete", "OK", "Information") | Out-Null
 })
 
 # ============================================================
