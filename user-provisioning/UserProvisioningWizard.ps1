@@ -122,6 +122,18 @@ $validSizes     = @("2GB", "50GB", "E3")
 $validCountries = @("US", "IN")
 $validYesNo     = @("N", "Y")
 
+# ============================================================
+#  External tenant B2B guest invitation (Domestic mode only)
+# ============================================================
+# After a Domestic-mode batch finishes creating users in the home tenant,
+# each newly created user is also invited as a B2B guest into this external
+# tenant, using the same UPN as the invited email address. This mirrors the
+# Entra "Invite external user (Preview)" flow: Basics (email/display name,
+# invite message unchecked) + Properties (first/last name, job title). No
+# groups or roles are assigned in the external tenant.
+$externalTenantId          = "10096675-b04b-4d53-88e6-9c640623b9ea"
+$externalInviteRedirectUrl = "https://myapplications.microsoft.com/"
+
 function Resolve-LicenseTier {
     param([string]$Value)
     switch (($Value + "").Trim().ToUpper()) {
@@ -151,11 +163,23 @@ function New-RandomPassword {
     return -join ($chars | Sort-Object { Get-Random })
 }
 
+# Fixed prefix + random 5-digit suffix (e.g. "CorroHealth@@34961"). Numbers
+# already used this session are tracked so the same exact password is never
+# handed to two different people in one run of the wizard - with only 10,000
+# possible suffixes, a same-session repeat is unlikely but not impossible
+# without this check.
+$script:usedConventionNumbers = New-Object System.Collections.Generic.HashSet[int]
+function New-ConventionPassword {
+    param([string]$Prefix = "CorroHealth@@")
+    do { $n = Get-Random -Minimum 0 -Maximum 100000 } while (-not $script:usedConventionNumbers.Add($n))
+    return "$Prefix$($n.ToString('D5'))"
+}
+
 # ============================================================
 #  Password mode dialog
 # ============================================================
 $pwdDialog = New-Object System.Windows.Forms.Form
-$pwdDialog.Text = "Password mode"; $pwdDialog.Size = New-Object System.Drawing.Size(400, 230)
+$pwdDialog.Text = "Password mode"; $pwdDialog.Size = New-Object System.Drawing.Size(400, 290)
 $pwdDialog.StartPosition = "CenterScreen"; $pwdDialog.FormBorderStyle = "FixedDialog"
 $pwdDialog.MaximizeBox = $false; $pwdDialog.MinimizeBox = $false
 
@@ -167,25 +191,41 @@ $radioShared.Text = "Use one shared password for all users in this run"
 $radioShared.Location = New-Object System.Drawing.Point(15, 60); $radioShared.Size = New-Object System.Drawing.Size(360, 20)
 $sharedPwdBox = New-Object System.Windows.Forms.MaskedTextBox
 $sharedPwdBox.PasswordChar = "*"; $sharedPwdBox.Location = New-Object System.Drawing.Point(35, 85); $sharedPwdBox.Width = 320; $sharedPwdBox.Enabled = $false
-$radioAuto.Add_CheckedChanged({ $sharedPwdBox.Enabled = $radioShared.Checked })
-$radioShared.Add_CheckedChanged({ $sharedPwdBox.Enabled = $radioShared.Checked })
+$radioConvention = New-Object System.Windows.Forms.RadioButton
+$radioConvention.Text = "Prefix + random 5-digit suffix per user (e.g. CorroHealth@@34961)"
+$radioConvention.Location = New-Object System.Drawing.Point(15, 115); $radioConvention.Size = New-Object System.Drawing.Size(360, 20)
+$conventionPrefixBox = New-Object System.Windows.Forms.TextBox
+$conventionPrefixBox.Text = "CorroHealth@@"; $conventionPrefixBox.Location = New-Object System.Drawing.Point(35, 140); $conventionPrefixBox.Width = 200; $conventionPrefixBox.Enabled = $false
+$conventionNote = New-Object System.Windows.Forms.Label
+$conventionNote.Text = "Note: stays permanent (no forced change) - only 10,000 possible suffixes."
+$conventionNote.Location = New-Object System.Drawing.Point(35, 165); $conventionNote.Size = New-Object System.Drawing.Size(330, 30); $conventionNote.Font = New-Object System.Drawing.Font("Segoe UI", 7.5)
+$radioAuto.Add_CheckedChanged({ $sharedPwdBox.Enabled = $radioShared.Checked; $conventionPrefixBox.Enabled = $radioConvention.Checked })
+$radioShared.Add_CheckedChanged({ $sharedPwdBox.Enabled = $radioShared.Checked; $conventionPrefixBox.Enabled = $radioConvention.Checked })
+$radioConvention.Add_CheckedChanged({ $sharedPwdBox.Enabled = $radioShared.Checked; $conventionPrefixBox.Enabled = $radioConvention.Checked })
 $btnPwdOk = New-Object System.Windows.Forms.Button
-$btnPwdOk.Text = "Continue"; $btnPwdOk.Location = New-Object System.Drawing.Point(270, 140); $btnPwdOk.Width = 100; $btnPwdOk.DialogResult = "OK"
-$pwdDialog.Controls.AddRange([System.Windows.Forms.Control[]]@($radioAuto, $radioShared, $sharedPwdBox, $btnPwdOk))
+$btnPwdOk.Text = "Continue"; $btnPwdOk.Location = New-Object System.Drawing.Point(270, 205); $btnPwdOk.Width = 100; $btnPwdOk.DialogResult = "OK"
+$pwdDialog.Controls.AddRange([System.Windows.Forms.Control[]]@($radioAuto, $radioShared, $sharedPwdBox, $radioConvention, $conventionPrefixBox, $conventionNote, $btnPwdOk))
 $pwdDialog.AcceptButton = $btnPwdOk
 Set-DarkForm $pwdDialog
-$radioAuto.ForeColor = $themeText; $radioShared.ForeColor = $themeText
+$radioAuto.ForeColor = $themeText; $radioShared.ForeColor = $themeText; $radioConvention.ForeColor = $themeText
+$conventionNote.ForeColor = $themeTextMuted
 $sharedPwdBox.BackColor = $themeControl; $sharedPwdBox.ForeColor = $themeText; $sharedPwdBox.BorderStyle = "FixedSingle"
+$conventionPrefixBox.BackColor = $themeControl; $conventionPrefixBox.ForeColor = $themeText; $conventionPrefixBox.BorderStyle = "FixedSingle"
 Set-DarkButton $btnPwdOk -Accent
 
-$passwordMode = "Auto"; $sharedPwd = $null
+$passwordMode = "Auto"; $sharedPwd = $null; $conventionPrefix = $null
 while ($true) {
     if ($pwdDialog.ShowDialog() -ne "OK") { exit }
     if ($radioShared.Checked) {
         if ([string]::IsNullOrWhiteSpace($sharedPwdBox.Text)) {
-            [System.Windows.Forms.MessageBox]::Show("Enter a shared password, or switch to auto-generate.", "Missing password", "OK", "Error") | Out-Null; continue
+            [System.Windows.Forms.MessageBox]::Show("Enter a shared password, or switch to another mode.", "Missing password", "OK", "Error") | Out-Null; continue
         }
         $passwordMode = "Shared"; $sharedPwd = $sharedPwdBox.Text
+    } elseif ($radioConvention.Checked) {
+        if ([string]::IsNullOrWhiteSpace($conventionPrefixBox.Text)) {
+            [System.Windows.Forms.MessageBox]::Show("Enter a prefix, or switch to another mode.", "Missing prefix", "OK", "Error") | Out-Null; continue
+        }
+        $passwordMode = "Convention"; $conventionPrefix = $conventionPrefixBox.Text
     } else { $passwordMode = "Auto"; $sharedPwd = $null }
     break
 }
@@ -200,6 +240,9 @@ try {
     [System.Windows.Forms.MessageBox]::Show("Could not connect to Microsoft Graph:`n`n$($_.Exception.Message)", "Graph sign-in failed", "OK", "Error") | Out-Null
     exit
 }
+# Remembered so the script can switch to the external tenant for guest
+# invitations later and then reconnect back to the home tenant afterward.
+$homeTenantId = (Get-MgContext).TenantId
 try {
     Connect-ExchangeOnline -ShowBanner:$false -ErrorAction Stop
 } catch {
@@ -281,10 +324,12 @@ function New-ToolButton($text, $width) {
 $btnAddRow         = New-ToolButton "Add row" 80
 $btnUserCreation   = New-ToolButton "User creation" 100
 $btnUploadCsv      = New-ToolButton "Upload CSV" 95
+$btnUploadHr       = New-ToolButton "Upload HR Export" 135
 $btnRemoveSelected = New-ToolButton "Remove selected" 115
 $btnSelectAll      = New-ToolButton "Select all" 85
 $btnLicenseRef     = New-ToolButton "License reference" 120
-$toolbar.Controls.AddRange([System.Windows.Forms.Control[]]@($btnAddRow, $btnUserCreation, $btnUploadCsv, $btnRemoveSelected, $btnSelectAll, $btnLicenseRef))
+$btnExportResults  = New-ToolButton "Re-export last results" 150
+$toolbar.Controls.AddRange([System.Windows.Forms.Control[]]@($btnAddRow, $btnUserCreation, $btnUploadCsv, $btnUploadHr, $btnRemoveSelected, $btnSelectAll, $btnLicenseRef, $btnExportResults))
 
 # ---- Grid ----
 $grid = New-Object System.Windows.Forms.DataGridView
@@ -524,6 +569,19 @@ $btnLicenseRef.Add_Click({
     $msg = "Mailbox size  ->  License granted`n`n2GB   ->  F3`n50GB  ->  F3 + Exchange Archive (F3+)`nE3    ->  E3 (full desktop Office)`n`nEntApps = Y adds Microsoft 365 Apps for Enterprise on top of any of the above."
     [System.Windows.Forms.MessageBox]::Show($msg, "License reference", "OK", "Information") | Out-Null
 })
+$btnExportResults.Add_Click({
+    if (-not $script:lastResults -or $script:lastResults.Count -eq 0) {
+        [System.Windows.Forms.MessageBox]::Show("No import has been run yet in this session, so there's nothing to export.", "Nothing to export", "OK", "Information") | Out-Null
+        return
+    }
+    $reExportPath = Join-Path $scriptDir "UserProvisioning_Results_$(Get-Date -Format 'yyyyMMdd_HHmmss_fff')_reexport.csv"
+    try {
+        $script:lastResults | Export-Csv -Path $reExportPath -NoTypeInformation -ErrorAction Stop
+        [System.Windows.Forms.MessageBox]::Show("Last run's results (from $script:lastResultsPath) re-exported to:`n`n$reExportPath", "Re-export complete", "OK", "Information") | Out-Null
+    } catch {
+        [System.Windows.Forms.MessageBox]::Show("Could not re-export results:`n`n$($_.Exception.Message)", "Re-export failed", "OK", "Error") | Out-Null
+    }
+})
 
 # ---- User creation (paste names) ----
 $btnUserCreation.Add_Click({
@@ -594,6 +652,104 @@ $btnUploadCsv.Add_Click({
     Import-Rows $rows
 })
 
+# ---- Upload HR export (Workday) directly, no CSV conversion step ----
+#
+# Workday's own export layout drifts between pulls - columns get added,
+# removed, or reordered (e.g. a "Leader" column present in one export and
+# absent in the next), so this maps by COLUMN HEADER TEXT, not position:
+# it locates the real header row by finding "Fields" in the first column,
+# then reads whatever recognizable headers exist under it. Anything HR data
+# can't tell us (license, internal-email, etc.) is left blank on purpose -
+# use "Apply to selected" after loading, same as any other batch.
+function Import-HrExportRows($filePath) {
+    if (-not (Get-Module -ListAvailable -Name ImportExcel)) {
+        [System.Windows.Forms.MessageBox]::Show(
+            "The 'ImportExcel' PowerShell module isn't installed on this machine, so this tool can't read the .xlsx file directly.`n`nInstall it once with:`n`n    Install-Module ImportExcel -Scope CurrentUser`n`nor convert the HR export to the standard CSV template first and use 'Upload CSV' instead - that path doesn't need this module.",
+            "ImportExcel module required", "OK", "Warning") | Out-Null
+        return
+    }
+    try { Import-Module ImportExcel -ErrorAction Stop } catch {
+        [System.Windows.Forms.MessageBox]::Show("Could not load the ImportExcel module:`n`n$($_.Exception.Message)", "Module load failed", "OK", "Error") | Out-Null
+        return
+    }
+
+    try { $raw = Import-Excel -Path $filePath -NoHeader -ErrorAction Stop }
+    catch { [System.Windows.Forms.MessageBox]::Show("Could not read that Excel file:`n`n$($_.Exception.Message)", "Read failed", "OK", "Error") | Out-Null; return }
+    if (-not $raw -or $raw.Count -eq 0) {
+        [System.Windows.Forms.MessageBox]::Show("That file has no rows.", "Nothing to import", "OK", "Information") | Out-Null
+        return
+    }
+
+    # Import-Excel -NoHeader returns objects with properties P1, P2, P3, ...
+    # in column order, so nothing here assumes a fixed header row number.
+    $headerRowIndex = -1
+    for ($i = 0; $i -lt $raw.Count; $i++) {
+        if (("$($raw[$i].P1)").Trim() -eq "Fields") { $headerRowIndex = $i; break }
+    }
+    if ($headerRowIndex -lt 0) {
+        [System.Windows.Forms.MessageBox]::Show("Couldn't find a header row (looking for a row starting with 'Fields') in that file. This may not be a Workday export in the expected layout - you can still convert it to the standard CSV template and use 'Upload CSV' instead.", "Header not found", "OK", "Error") | Out-Null
+        return
+    }
+
+    $headerRow = $raw[$headerRowIndex]
+    $colMap = @{}   # lowercased header text (Workday's trailing "*" for required fields stripped) -> property name (P1, P2, ...)
+    foreach ($prop in $headerRow.PSObject.Properties) {
+        $text = ("$($prop.Value)").Trim() -replace '\*+$', ''
+        $text = $text.Trim()
+        if ($text) { $colMap[$text.ToLower()] = $prop.Name }
+    }
+
+    $nbsp = [char]0x00A0
+    function Get-HrField($row, $names) {
+        foreach ($n in $names) {
+            if ($colMap.ContainsKey($n)) {
+                $val = "$($row.($colMap[$n]))" -replace $nbsp, ""
+                return $val.Trim()
+            }
+        }
+        return ""
+    }
+
+    $importObjects = @()
+    for ($i = $headerRowIndex + 1; $i -lt $raw.Count; $i++) {
+        $row = $raw[$i]
+        # The "Example" row (when present) is marked in column A, not by a
+        # fixed row number - some exports have it, some don't (confirmed by
+        # comparing two real HR pulls), so it's detected by that marker.
+        if (("$($row.P1)").Trim() -match "(?i)^example$") { continue }
+        $fn = Get-HrField $row @("first name")
+        $ln = Get-HrField $row @("last name")
+        if (-not $fn -and -not $ln) { continue }
+        $importObjects += [PSCustomObject]@{
+            FirstName   = $fn
+            LastName    = $ln
+            UserCountry = Get-HrField $row @("country")
+            Manager     = Get-HrField $row @("leader", "manager")
+            Designation = Get-HrField $row @("position title", "job profile", "job title", "designation", "title")
+        }
+    }
+
+    if ($importObjects.Count -eq 0) {
+        [System.Windows.Forms.MessageBox]::Show("Found the header row, but no usable name data underneath it.", "Nothing to import", "OK", "Information") | Out-Null
+        return
+    }
+
+    Import-Rows $importObjects
+    $mgrCol   = @("leader", "manager") | Where-Object { $colMap.ContainsKey($_) } | Select-Object -First 1
+    $titleCol = @("position title", "job profile", "job title", "designation", "title") | Where-Object { $colMap.ContainsKey($_) } | Select-Object -First 1
+    $mgrNote   = if ($mgrCol) { "`nManager was mapped from the '$mgrCol' column." } else { "" }
+    $titleNote = if ($titleCol) { "`nJob title was mapped from the '$titleCol' column." } else { "" }
+    [System.Windows.Forms.MessageBox]::Show(
+        "Loaded $($importObjects.Count) user(s) from the HR export.`n`nLicense and any other IT-specific fields were left blank on purpose - use 'Apply to selected' to set them for this batch.$mgrNote$titleNote",
+        "HR export loaded", "OK", "Information") | Out-Null
+}
+$btnUploadHr.Add_Click({
+    $ofd = New-Object System.Windows.Forms.OpenFileDialog
+    $ofd.Filter = "Excel files (*.xlsx)|*.xlsx|All files (*.*)|*.*"; $ofd.Title = "Select HR export (Workday) file"
+    if ($ofd.ShowDialog() -ne "OK") { return }
+    Import-HrExportRows $ofd.FileName
+})
+
 # ---- Bulk apply ----
 $btnApplySelected.Add_Click({
     $count = 0
@@ -624,9 +780,10 @@ function Get-UpnParts($firstName, $lastName) {
     return @{ DisplayName = "$($firstName.Trim()) $($lastName.Trim())"; MailNickname = "$fn.$ln"; Upn = "$fn.$ln@corrohealth.com" }
 }
 function Add-UserToGroupOrList($upn, $userOid, $groupName) {
-    $group = Get-MgGroup -Filter "DisplayName eq '$groupName'" -ErrorAction SilentlyContinue
+    $group = Get-MgGroup -Filter "DisplayName eq '$groupName'" -Property Id, DisplayName, Mail, GroupTypes -ErrorAction SilentlyContinue
     if (-not $group) { return "Group not found: $groupName" }
-    if ($group.Mail -like "*corrohealth.com*") {
+    $isUnified = $group.GroupTypes -contains "Unified"
+    if ($group.Mail -like "*corrohealth.com*" -and -not $isUnified) {
         try { Add-DistributionGroupMember -Identity $group.DisplayName -Member $upn -BypassSecurityGroupManagerCheck -ErrorAction Stop; return "Added to $groupName (Exchange)" }
         catch { return "Failed adding to $($groupName): $($_.Exception.Message)" }
     } else {
@@ -648,6 +805,7 @@ function Wait-ForMailbox($upn, $timeoutSeconds = 300, $intervalSeconds = 15) {
 # ============================================================
 $btnRunImport.Add_Click({
     $mode = $script:currentMode
+    $runTimestamp = Get-Date -Format "yyyyMMdd_HHmmss_fff"
     $rowsToProcess = @()
     foreach ($row in $grid.Rows) { if ($row.Cells["Include"].Value -eq $true) { $rowsToProcess += $row } }
     if ($rowsToProcess.Count -eq 0) { [System.Windows.Forms.MessageBox]::Show("No rows selected to import.", "Nothing to run", "OK", "Information") | Out-Null; return }
@@ -678,7 +836,7 @@ $btnRunImport.Add_Click({
         $tier = Resolve-LicenseTier $licRaw
         $parts = Get-UpnParts $fn $ln
         $upn = if ($upnOverride) { $upnOverride } else { $parts.Upn }
-        $userPwd = if ($passwordMode -eq "Shared") { $sharedPwd } else { New-RandomPassword -Length 16 }
+        $userPwd = if ($passwordMode -eq "Shared") { $sharedPwd } elseif ($passwordMode -eq "Convention") { New-ConventionPassword -Prefix $conventionPrefix } else { New-RandomPassword -Length 16 }
 
         $recordStatus = {
             param($status)
@@ -697,7 +855,7 @@ $btnRunImport.Add_Click({
             & $recordStatus "Skipped - already exists ($state)"; continue
         }
 
-        $pwProfile = @{ Password = $userPwd; ForceChangePasswordNextSignIn = $true }
+        $pwProfile = @{ Password = $userPwd; ForceChangePasswordNextSignIn = $false }
         $mailNickname = ($upn -split "@")[0]
         $newParams = @{ GivenName=$fn; Surname=$ln; DisplayName=$parts.DisplayName; AccountEnabled=$true; UserPrincipalName=$upn; MailNickname=$mailNickname; PasswordProfile=$pwProfile; UsageLocation=$country; JobTitle=$title }
         if ($country) { $newParams["Country"] = $country }
@@ -712,12 +870,21 @@ $btnRunImport.Add_Click({
         $notes = @("Created")
 
         if ($managerRaw) {
-            try {
-                $managerRef = @{ "@odata.id" = "https://graph.microsoft.com/v1.0/users/$managerRaw" }
-                Set-MgUserManagerByRef -UserId $upn -BodyParameter $managerRef -ErrorAction Stop
-                $notes += "Manager set ($managerRaw)"
-            } catch {
-                $notes += "Manager FAILED: $($_.Exception.Message)"
+            $mgr = $null
+            try { $mgr = Get-MgUser -UserId $managerRaw -Property Id, DisplayName -ErrorAction Stop } catch { $mgr = $null }
+            if (-not $mgr) {
+                try { $mgr = Get-MgUser -Filter "DisplayName eq '$managerRaw'" -Property Id, DisplayName -ErrorAction SilentlyContinue | Select-Object -First 1 } catch { $mgr = $null }
+            }
+            if ($mgr) {
+                try {
+                    $mgrRef = @{ "@odata.id" = "https://graph.microsoft.com/v1.0/users/$($mgr.Id)" }
+                    Set-MgUserManagerByRef -UserId $upn -BodyParameter $mgrRef -ErrorAction Stop
+                    $notes += "Manager set: $($mgr.DisplayName)"
+                } catch {
+                    $notes += "Manager assignment FAILED: $($_.Exception.Message)"
+                }
+            } else {
+                $notes += "Manager not found: '$managerRaw'"
             }
         }
 
@@ -743,7 +910,7 @@ $btnRunImport.Add_Click({
         } catch { $notes += "License FAILED: $($_.Exception.Message)" }
 
         & $recordStatus ($notes -join " | ")
-        $created += [PSCustomObject]@{ Row=$row; Upn=$upn; Oid=$userOid; Tier=$tier; Subcon=$subcon; Internal=$internal; GroupsRaw=$groupsRaw; Notes=$notes; Country=$country }
+        $created += [PSCustomObject]@{ Row=$row; Upn=$upn; Oid=$userOid; Tier=$tier; Subcon=$subcon; Internal=$internal; GroupsRaw=$groupsRaw; Notes=$notes; Country=$country; FirstName=$fn; LastName=$ln; JobTitle=$title }
     }
 
     if ($created.Count -gt 0) {
@@ -764,11 +931,19 @@ $btnRunImport.Add_Click({
             # Entra security groups. Exchange distribution membership, archiving,
             # and the subcontractor attribute all require the mailbox to exist;
             # Entra security-group adds and licensing do not.
+            #
+            # Note: a mail address alone doesn't mean "use Exchange" - Microsoft
+            # 365 Groups (SharePoint site membership, Teams) also carry a
+            # corrohealth.com address but Exchange's Add-DistributionGroupMember
+            # rejects them outright. Only classic distribution lists / mail-
+            # enabled security groups go through Exchange; Unified (M365) groups
+            # go through Graph like a plain security group.
             $resolved = @()
             $needsMailbox = $false
             foreach ($g in $groupNames) {
-                $grp = Get-MgGroup -Filter "DisplayName eq '$g'" -ErrorAction SilentlyContinue
-                $isExchange = ($grp -and ($grp.Mail -like "*corrohealth.com*"))
+                $grp = Get-MgGroup -Filter "DisplayName eq '$g'" -Property Id, DisplayName, Mail, GroupTypes -ErrorAction SilentlyContinue
+                $isUnified = $grp -and ($grp.GroupTypes -contains "Unified")
+                $isExchange = ($grp -and ($grp.Mail -like "*corrohealth.com*") -and -not $isUnified)
                 if ($isExchange) { $needsMailbox = $true }
                 $resolved += [PSCustomObject]@{ Name = $g; Group = $grp; IsExchange = $isExchange }
             }
@@ -813,6 +988,7 @@ $btnRunImport.Add_Click({
                 if (-not $ok) { $notes += "Mailbox not ready within timeout - some Exchange steps may be incomplete" }
             }
 
+            $c.Notes = $notes
             $c.Row.Cells["Status"].Value = ($notes -join " | ")
             foreach ($res in $results) { if ($res.UserPrincipalName -eq $c.Upn) { $res.Status = ($notes -join " | ") } }
             $ready++
@@ -820,12 +996,91 @@ $btnRunImport.Add_Click({
         $lblProgress.Text = "Done - $ready user(s) processed."
     }
 
+    # ============================================================
+    #  External tenant B2B guest invitation (Domestic mode only)
+    # ============================================================
+    # Skipped entirely for Global/India batches. Only fires for users that
+    # were actually created above (skipped/failed rows are excluded since
+    # they were never added to $created).
+    $externalInviteSummary = $null
+    if ($mode -eq "Domestic" -and $created.Count -gt 0) {
+        $lblProgress.Text = "Connecting to external tenant for guest invitations..."; [System.Windows.Forms.Application]::DoEvents()
+        $extConnectOk = $true
+        try {
+            Disconnect-MgGraph -ErrorAction SilentlyContinue | Out-Null
+            Connect-MgGraph -TenantId $externalTenantId -Scopes "User.Invite.All", "User.ReadWrite.All" -NoWelcome -ErrorAction Stop
+            $actualTenantId = (Get-MgContext).TenantId
+            if ($actualTenantId -ne $externalTenantId) {
+                throw "Connected, but the active Graph context is tenant '$actualTenantId', not the expected external tenant '$externalTenantId'. This usually means a cached sign-in session was reused instead of switching tenants."
+            }
+        } catch {
+            $extConnectOk = $false
+            $externalInviteSummary = "External tenant sign-in FAILED - no users were invited externally. See the warning shown earlier for details."
+            [System.Windows.Forms.MessageBox]::Show(
+                "Could not sign in to the external tenant for guest invitations:`n`n$($_.Exception.Message)`n`nAll users above were still created in your home tenant. None of them were invited externally - you can invite them manually, or fix sign-in and re-run.",
+                "External invite sign-in failed", "OK", "Warning") | Out-Null
+        }
+
+        if ($extConnectOk) {
+            $invited = 0
+            $inviteSucceeded = 0
+            $inviteFailed = 0
+            foreach ($c in $created) {
+                $lblProgress.Text = "Inviting external guest... ($invited of $($created.Count))"; [System.Windows.Forms.Application]::DoEvents()
+                $fullName = "$($c.FirstName) $($c.LastName)".Trim()
+
+                try {
+                    $inv = New-MgInvitation `
+                        -InvitedUserEmailAddress $c.Upn `
+                        -InvitedUserDisplayName $fullName `
+                        -SendInvitationMessage:$false `
+                        -InviteRedirectUrl $externalInviteRedirectUrl `
+                        -ErrorAction Stop
+                    $c.Notes += "External invite sent"
+                    $inviteSucceeded++
+
+                    try {
+                        Update-MgUser -UserId $inv.InvitedUser.Id -GivenName $c.FirstName -Surname $c.LastName -JobTitle $c.JobTitle -ErrorAction Stop
+                        $c.Notes += "External profile set (name/title)"
+                    } catch {
+                        $c.Notes += "External profile update FAILED: $($_.Exception.Message)"
+                    }
+                } catch {
+                    $c.Notes += "External invite FAILED: $($_.Exception.Message)"
+                    $inviteFailed++
+                }
+
+                $c.Row.Cells["Status"].Value = ($c.Notes -join " | ")
+                foreach ($res in $results) { if ($res.UserPrincipalName -eq $c.Upn) { $res.Status = ($c.Notes -join " | ") } }
+                $invited++
+            }
+            $lblProgress.Text = "Done - $invited external invite(s) processed."
+            $externalInviteSummary = "External tenant invites: $inviteSucceeded succeeded, $inviteFailed failed (out of $($created.Count))."
+
+            # Switch back to the home tenant so the rest of this run (results
+            # export) and any later "Run import" click in this same session
+            # still talk to the right tenant.
+            try {
+                Disconnect-MgGraph -ErrorAction SilentlyContinue | Out-Null
+                Connect-MgGraph -TenantId $homeTenantId -Scopes "User.ReadWrite.All", "Group.ReadWrite.All" -NoWelcome -ErrorAction Stop
+            } catch {
+                [System.Windows.Forms.MessageBox]::Show(
+                    "External invitations finished, but reconnecting to your home tenant afterward failed:`n`n$($_.Exception.Message)`n`nIf you run another import in this session, you may be prompted to sign in again.",
+                    "Reconnect to home tenant failed", "OK", "Warning") | Out-Null
+            }
+        }
+    }
+
     $form.Cursor = [System.Windows.Forms.Cursors]::Default; $btnRunImport.Enabled = $true
-    $resultsPath = Join-Path $scriptDir "UserProvisioning_Results_$timestamp.csv"
+    $resultsPath = Join-Path $scriptDir "UserProvisioning_Results_$runTimestamp.csv"
     try { $results | Export-Csv -Path $resultsPath -NoTypeInformation -ErrorAction Stop; $exportNote = "Results + credentials saved to:`n$resultsPath" }
     catch { $exportNote = "Could not save results file: $($_.Exception.Message)" }
-    $pwdSummary = if ($passwordMode -eq "Shared") { "Shared password: $sharedPwd" } else { "Each user got a unique password - see the results file." }
-    [System.Windows.Forms.MessageBox]::Show("Import finished. See the Status column for per-user results.`n`n$pwdSummary`n`n$exportNote", "Import complete", "OK", "Information") | Out-Null
+    $script:lastResults = $results
+    $script:lastResultsPath = $resultsPath
+    $pwdSummary = if ($passwordMode -eq "Shared") { "Shared password: $sharedPwd" } elseif ($passwordMode -eq "Convention") { "Each user got '$conventionPrefix' + a random 5-digit suffix - see the results file." } else { "Each user got a unique password - see the results file." }
+    $finalMsg = "Import finished. See the Status column for per-user results.`n`n$pwdSummary`n`n$exportNote"
+    if ($externalInviteSummary) { $finalMsg += "`n`n$externalInviteSummary" }
+    [System.Windows.Forms.MessageBox]::Show($finalMsg, "Import complete", "OK", "Information") | Out-Null
 })
 
 # ============================================================
