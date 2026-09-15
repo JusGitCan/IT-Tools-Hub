@@ -3,12 +3,26 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>User Provisioning Wizard · CorroHealth Power Tools</title>
+<title>CorroHealth · Power Tools for IT</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyBpZD0iTGF5ZXJfMSIgZGF0YS1uYW1lPSJMYXllciAxIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB2aWV3Qm94PSIwIDAgMTg1IDE4NSI+CiAgPGRlZnM+CiAgICA8c3R5bGU+CiAgICAgIC5jbHMtMSB7CiAgICAgICAgZmlsbDogdXJsKCNOZXdfR3JhZGllbnRfU3dhdGNoXzktMyk7CiAgICAgIH0KCiAgICAgIC5jbHMtMiB7CiAgICAgICAgZmlsbDogdXJsKCNOZXdfR3JhZGllbnRfU3dhdGNoXzktMik7CiAgICAgIH0KCiAgICAgIC5jbHMtMyB7CiAgICAgICAgZmlsbDogdXJsKCNOZXdfR3JhZGllbnRfU3dhdGNoXzkpOwogICAgICB9CiAgICA8L3N0eWxlPgogICAgPGxpbmVhckdyYWRpZW50IGlkPSJOZXdfR3JhZGllbnRfU3dhdGNoXzkiIGRhdGEtbmFtZT0iTmV3IEdyYWRpZW50IFN3YXRjaCA5IiB4MT0iOS42MSIgeTE9IjEwNy42NSIgeDI9IjE2MC41MiIgeTI9IjEwNy42NSIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiPgogICAgICA8c3RvcCBvZmZzZXQ9IjAiIHN0b3AtY29sb3I9IiNkYmUxMzQiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIuNTQiIHN0b3AtY29sb3I9IiM0ZGM0ZDMiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjNTEyZjZmIi8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogICAgPGxpbmVhckdyYWRpZW50IGlkPSJOZXdfR3JhZGllbnRfU3dhdGNoXzktMiIgZGF0YS1uYW1lPSJOZXcgR3JhZGllbnQgU3dhdGNoIDkiIHgxPSI5LjYxIiB5MT0iOTYuNzMiIHgyPSIxNjAuNTIiIHkyPSI5Ni43MyIgeGxpbms6aHJlZj0iI05ld19HcmFkaWVudF9Td2F0Y2hfOSIvPgogICAgPGxpbmVhckdyYWRpZW50IGlkPSJOZXdfR3JhZGllbnRfU3dhdGNoXzktMyIgZGF0YS1uYW1lPSJOZXcgR3JhZGllbnQgU3dhdGNoIDkiIHgxPSI5LjYxIiB5MT0iNjkuMzMiIHgyPSIxNjAuNTIiIHkyPSI2OS4zMyIgeGxpbms6aHJlZj0iI05ld19HcmFkaWVudF9Td2F0Y2hfOSIvPgogIDwvZGVmcz4KICA8cGF0aCBjbGFzcz0iY2xzLTMiIGQ9Ik0xNjkuMTMsNjQuNDNjLTIuNzEsMC00LjksMi4xOS00LjksNC45LDAsMzkuNTUtMzIuMTgsNzEuNzMtNzEuNzMsNzEuNzNTMjAuNzcsMTA4Ljg4LDIwLjc3LDY5LjMzYzAtMi43MS0yLjItNC45LTQuOS00LjlzLTQuOSwyLjE5LTQuOSw0LjljMCw0NC45NiwzNi41Nyw4MS41Myw4MS41Myw4MS41M3M4MS41My0zNi41Nyw4MS41My04MS41M2MwLTIuNzEtMi4xOS00LjktNC45LTQuOVoiLz4KICA8cGF0aCBjbGFzcz0iY2xzLTIiIGQ9Ik05Mi41LDEyOS4wM2MzMi45MiwwLDU5LjY5LTI2Ljc4LDU5LjY5LTU5LjY5LDAtMi43MS0yLjE5LTQuOS00LjktNC45cy00LjksMi4xOS00LjksNC45YzAsMjcuNTEtMjIuMzgsNDkuODktNDkuODksNDkuODlzLTQ5Ljg5LTIyLjM4LTQ5Ljg5LTQ5Ljg5YzAtMi43MS0yLjItNC45LTQuOS00LjlzLTQuOSwyLjE5LTQuOSw0LjljMCwzMi45MiwyNi43OCw1OS42OSw1OS42OSw1OS42OVoiLz4KICA8cGF0aCBjbGFzcz0iY2xzLTEiIGQ9Ik05Mi41LDEwNC41M2MxOS40MSwwLDM1LjItMTUuNzksMzUuMi0zNS4ycy0xNS43OS0zNS4yLTM1LjItMzUuMi0zNS4yLDE1Ljc5LTM1LjIsMzUuMiwxNS43OSwzNS4yLDM1LjIsMzUuMlptMC02MC41OWMxNCwwLDI1LjM5LDExLjM5LDI1LjM5LDI1LjM5cy0xMS4zOSwyNS4zOS0yNS4zOSwyNS4zOS0yNS4zOS0xMS4zOS0yNS4zOS0yNS4zOSwxMS4zOS0yNS4zOSwyNS4zOS0yNS4zOVoiLz4KPC9zdmc+">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<!-- MSAL sign-in library. Recommended: download msal-browser.min.js into a /shared folder in your
+     repo (matches your lead's setup and works with MSAL v3+). Zero-file alternative: comment the
+     line below and uncomment the Microsoft CDN line (serves the older but functional v2.35.0). -->
+<script src="shared/msal-browser.min.js"></script>
+<!-- <script src="https://alcdn.msauth.net/browser/2.35.0/js/msal-browser.min.js"></script> -->
 <style>
-  /* Inherits the CorroHealth Tools Hub design tokens so this page matches the hub. */
+  /* ============================================================
+     CorroHealth Tools Hub
+     Brand palette (from CorroColors):
+       Eminence Purple  #512e6e   (primary)
+       Deep Magenta     #5e174d   (secondary)
+       Gold             #e7b524   (accent)
+       Logo gradient    lime -> teal -> purple
+     ============================================================ */
+
   :root {
     --brand-purple: #512e6e;
     --brand-magenta: #5e174d;
@@ -17,284 +31,737 @@
     --grad-teal: #35b6b6;
     --grad-purple: #5b2d86;
   }
+
   html[data-theme="dark"] {
-    --bg: #140d1e; --bg-glow: #1e1230; --surface: #1e1630; --surface-2: #251b3a;
-    --surface-hover: #2b2044; --border: #342747; --border-soft: #2a2040;
-    --text: #f3eefb; --text-muted: #a99cc0; --text-faint: #7d7196; --btn-face: #2a1f42;
+    --bg: #140d1e;
+    --bg-glow: #1e1230;
+    --surface: #1e1630;
+    --surface-2: #251b3a;
+    --surface-hover: #2b2044;
+    --border: #342747;
+    --border-soft: #2a2040;
+    --text: #f3eefb;
+    --text-muted: #a99cc0;
+    --text-faint: #7d7196;
+    --btn-face: #2a1f42;
+    --logo-word: #ffffff;
+    --title-gold: #e7b524;
+    --title-fill: #ffffff;
   }
+
   html[data-theme="light"] {
-    --bg: #f6f3fa; --bg-glow: #efe8f6; --surface: #ffffff; --surface-2: #faf7fd;
-    --surface-hover: #f3eef9; --border: #e4dcef; --border-soft: #ece5f4;
-    --text: #241633; --text-muted: #6a5c80; --text-faint: #948aa6; --btn-face: #ffffff;
+    --bg: #f6f3fa;
+    --bg-glow: #efe8f6;
+    --surface: #ffffff;
+    --surface-2: #faf7fd;
+    --surface-hover: #f3eef9;
+    --border: #e4dcef;
+    --border-soft: #ece5f4;
+    --text: #241633;
+    --text-muted: #6a5c80;
+    --text-faint: #948aa6;
+    --btn-face: #ffffff;
+    --logo-word: #241633;
+    --title-gold: #9a6f0a;
+    --title-fill: #0d0d0d;
   }
+
   * { box-sizing: border-box; margin: 0; padding: 0; }
+
   body {
-    font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--text);
-    line-height: 1.5; -webkit-font-smoothing: antialiased; min-height: 100vh;
-    position: relative; overflow-x: hidden; transition: background .35s ease, color .35s ease;
+    font-family: 'Inter', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+    position: relative;
+    overflow-x: hidden;
+    transition: background .35s ease, color .35s ease;
   }
+
+  /* Ambient brand ripple behind the hero — the CorroHealth arc motif */
   .ambient {
-    position: fixed; top: -220px; left: 50%; transform: translateX(-50%);
-    width: 1100px; height: 700px; pointer-events: none; z-index: 0; opacity: .5;
+    position: fixed;
+    top: -220px; left: 50%;
+    transform: translateX(-50%);
+    width: 1100px; height: 700px;
+    pointer-events: none; z-index: 0;
+    opacity: .5;
   }
   html[data-theme="light"] .ambient { opacity: .35; }
+
   .shell { position: relative; z-index: 1; max-width: 1180px; margin: 0 auto; padding: 0 28px; }
 
-  header { display: flex; align-items: center; justify-content: space-between; padding: 22px 0 26px; }
+  /* ---------- Top bar ---------- */
+  header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 22px 0 26px;
+  }
   .brand { display: flex; align-items: center; gap: 13px; }
-  .brand .mark { width: 46px; height: 40px; flex-shrink: 0; }
-  .brand-text { display: flex; align-items: baseline; gap: 10px; }
-  .brand-text .name { font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 20px; letter-spacing: -0.01em; color: var(--text); }
-  .brand-text .tag {
-    font-family: 'JetBrains Mono', monospace; font-size: 10.5px; letter-spacing: .06em;
-    text-transform: uppercase; color: var(--text-muted); border: 1px solid var(--border);
+  .brand-logo { height: 30px; width: auto; display: block; flex-shrink: 0; }
+  .brand .tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase;
+    color: var(--text-muted);
+    border: 1px solid var(--border);
     padding: 3px 8px; border-radius: 6px;
   }
+
   .top-actions { display: flex; align-items: center; gap: 10px; }
-  .back-link {
-    display: inline-flex; align-items: center; gap: 8px; text-decoration: none;
-    font-size: 14px; font-weight: 500; color: var(--text-muted);
-    border: 1px solid var(--border); background: var(--btn-face);
-    padding: 9px 15px; border-radius: 9px; transition: all .2s ease;
-  }
-  .back-link:hover { color: var(--text); border-color: var(--brand-gold); }
-  .back-link svg { width: 15px; height: 15px; }
   .icon-btn {
-    width: 38px; height: 38px; border-radius: 9px; border: 1px solid var(--border);
-    background: var(--btn-face); color: var(--text-muted); display: grid; place-items: center;
-    cursor: pointer; transition: all .2s ease;
+    width: 38px; height: 38px; border-radius: 9px;
+    border: 1px solid var(--border);
+    background: var(--btn-face);
+    color: var(--text-muted);
+    display: grid; place-items: center; cursor: pointer;
+    transition: all .2s ease;
   }
   .icon-btn:hover { color: var(--text); border-color: var(--brand-gold); }
-
-  /* Hero */
-  .hero { padding: 30px 0 34px; border-bottom: 1px solid var(--border-soft); }
-  .hero .ico-row { display: flex; align-items: center; gap: 16px; margin-bottom: 18px; }
-  .hero .ico {
-    width: 52px; height: 52px; border-radius: 14px; display: grid; place-items: center;
-    color: #fff; background: linear-gradient(135deg, #45c7c7, #2f8f8f); flex-shrink: 0;
-  }
-  .hero .ico svg { width: 26px; height: 26px; }
-  .hero h1 { font-family: 'Space Grotesk', sans-serif; font-size: clamp(28px, 4vw, 40px); font-weight: 600; letter-spacing: -0.025em; line-height: 1.05; }
-  .hero .status-line { display: flex; align-items: center; gap: 10px; margin-top: 6px; }
-  .hero .status { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--grad-lime); display: inline-flex; align-items: center; gap: 6px; }
-  .hero .status .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--grad-lime); }
-  .hero p { color: var(--text-muted); font-size: 15px; max-width: 620px; margin-top: 14px; }
-
-  /* Download */
-  .cta-row { margin: 30px 0 10px; }
-  .download {
-    display: inline-flex; align-items: center; gap: 10px; text-decoration: none;
-    font-family: 'Inter', sans-serif; font-size: 15px; font-weight: 600; color: #fff;
+  .signin {
+    display: inline-flex; align-items: center; gap: 9px;
+    font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 500;
+    color: #fff;
     background: linear-gradient(135deg, var(--brand-purple), var(--brand-magenta));
-    border: none; padding: 13px 24px; border-radius: 10px; cursor: pointer;
-    box-shadow: 0 4px 18px -6px rgba(81,46,110,.7); transition: transform .15s ease, box-shadow .2s ease;
+    border: none; padding: 10px 18px; border-radius: 9px; cursor: pointer;
+    transition: transform .15s ease, box-shadow .2s ease;
+    box-shadow: 0 4px 18px -6px rgba(81,46,110,.7);
   }
-  .download:hover { transform: translateY(-1px); box-shadow: 0 8px 24px -6px rgba(81,46,110,.85); }
-  .download svg { width: 17px; height: 17px; }
+  .signin:hover { transform: translateY(-1px); box-shadow: 0 8px 24px -6px rgba(81,46,110,.85); }
+  .signin svg { width: 16px; height: 16px; }
+  .signin.loading { opacity: .7; pointer-events: none; }
 
-  /* Sections */
-  .section { padding: 34px 0 4px; }
+  .account-chip {
+    display: flex; align-items: center; gap: 9px;
+    border: 1px solid var(--border); background: var(--btn-face);
+    border-radius: 9px; padding: 5px 8px 5px 6px;
+  }
+  .acct-initials {
+    width: 26px; height: 26px; border-radius: 7px; flex-shrink: 0;
+    display: grid; place-items: center;
+    font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 500; color: #fff;
+    background: linear-gradient(135deg, var(--brand-purple), var(--brand-magenta));
+  }
+  .acct-name {
+    font-size: 13px; color: var(--text); max-width: 150px;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .acct-signout {
+    background: none; border: none; cursor: pointer; color: var(--text-faint);
+    display: grid; place-items: center; padding: 3px; border-radius: 6px;
+  }
+  .acct-signout:hover { color: var(--brand-gold); }
+
+  /* ---------- Hero ---------- */
+  .hero {
+    display: flex; align-items: flex-end; justify-content: space-between;
+    gap: 30px; padding: 30px 0 46px;
+    border-bottom: 1px solid var(--border-soft);
+    flex-wrap: wrap;
+  }
+  .hero h1 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(34px, 5vw, 52px); font-weight: 600;
+    letter-spacing: -0.025em; line-height: 1.02;
+    color: var(--title-fill);
+    -webkit-text-stroke: 0.8px #e7b524;
+    text-stroke: 0.8px #e7b524;
+    paint-order: stroke fill;
+  }
+  .hero h1 .accent { color: inherit; }
+  .hero p {
+    color: var(--text-muted); font-size: 15px; max-width: 560px; margin-top: 14px;
+  }
+  .counter {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12.5px; color: var(--text-muted);
+    border: 1px solid var(--border);
+    border-radius: 999px; padding: 8px 15px;
+    display: inline-flex; align-items: center; gap: 9px;
+    white-space: nowrap; background: var(--surface);
+  }
+  .counter .live-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--grad-lime); box-shadow: 0 0 0 3px rgba(156,203,59,.18); }
+
+  /* ---------- Sections ---------- */
+  .section { padding: 40px 0 4px; }
   .eyebrow {
-    font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: .22em;
-    text-transform: uppercase; color: var(--text-faint); margin-bottom: 18px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; letter-spacing: .22em; text-transform: uppercase;
+    color: var(--text-faint); margin-bottom: 20px;
     display: flex; align-items: center; gap: 12px;
   }
   .eyebrow::after { content: ""; flex: 1; height: 1px; background: var(--border-soft); }
 
-  .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 22px 24px; margin-bottom: 16px; }
-  .panel h2 { font-family: 'Space Grotesk', sans-serif; font-size: 16px; font-weight: 600; margin-bottom: 12px; }
-  .panel p, .panel li { font-size: 14px; color: var(--text-muted); line-height: 1.65; }
-  .panel ol, .panel ul { margin: 6px 0 0 18px; display: grid; gap: 7px; }
-  .panel code {
-    font-family: 'JetBrains Mono', monospace; font-size: 12.5px; background: var(--surface-2);
-    border: 1px solid var(--border-soft); padding: 2px 6px; border-radius: 5px; color: var(--brand-gold);
+  .grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px;
   }
-  .note {
-    margin-top: 14px; background: var(--surface-2); border: 1px solid var(--border-soft);
-    border-left: 3px solid var(--brand-gold); border-radius: 8px; padding: 11px 15px;
-    font-size: 13px; color: var(--text-muted);
+
+  /* ---------- Tool card ---------- */
+  .card {
+    position: relative;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px; padding: 22px 22px 18px;
+    cursor: pointer; text-decoration: none; color: inherit;
+    display: flex; flex-direction: column; min-height: 176px;
+    transition: transform .18s ease, border-color .18s ease, background .18s ease;
+    overflow: hidden;
   }
-  table { border-collapse: collapse; width: 100%; margin-top: 6px; font-size: 13.5px; }
-  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border-soft); }
-  th { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--text-faint); }
-  td { color: var(--text-muted); }
+  .card::before {
+    content: ""; position: absolute; inset: 0;
+    background: radial-gradient(420px 160px at 100% 0%, rgba(231,181,36,.07), transparent 60%);
+    opacity: 0; transition: opacity .25s ease;
+  }
+  .card:hover { transform: translateY(-3px); border-color: var(--brand-gold); background: var(--surface-hover); }
+  .card:hover::before { opacity: 1; }
+  .card:focus-visible { outline: 2px solid var(--brand-gold); outline-offset: 2px; }
+  .card.locked { cursor: default; opacity: .6; }
+  .card.locked:hover { transform: none; border-color: var(--border); background: var(--surface); }
+  .card.locked:hover::before { opacity: 0; }
 
-  footer { text-align: center; color: var(--text-faint); font-size: 12.5px; padding: 30px 0 42px; font-family: 'JetBrains Mono', monospace; }
+  .card .ico {
+    width: 44px; height: 44px; border-radius: 12px;
+    display: grid; place-items: center; margin-bottom: 16px;
+    color: #fff;
+  }
+  .card .ico svg { width: 22px; height: 22px; }
+  .card h3 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 17px; font-weight: 600; letter-spacing: -0.01em; margin-bottom: 8px;
+  }
+  .card p { font-size: 13px; color: var(--text-muted); line-height: 1.55; flex: 1; }
 
+  .card .foot {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-top: 16px;
+  }
+  .lock { color: var(--text-faint); display: inline-flex; }
+  .lock svg { width: 15px; height: 15px; }
+  .status {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    display: inline-flex; align-items: center; gap: 6px; letter-spacing: .02em;
+    margin-left: auto;
+  }
+  .status .dot { width: 6px; height: 6px; border-radius: 50%; }
+  .status.live { color: var(--grad-lime); }
+  .status.live .dot { background: var(--grad-lime); }
+  .status.updating { color: #f0b429; }
+  .status.updating .dot { background: #f0b429; }
+  .status.down { color: #ef5a5a; }
+  .status.down .dot { background: #ef5a5a; }
+  .status.beta { color: #b79ad6; }
+  .status.beta .dot { background: #b79ad6; }
+  .status.soon { color: var(--text-faint); }
+  .status.soon .dot { background: var(--text-faint); }
+
+  /* icon tints */
+  .t-purple { background: linear-gradient(135deg, #6b3d92, #512e6e); }
+  .t-magenta{ background: linear-gradient(135deg, #7a2263, #5e174d); }
+  .t-gold   { background: linear-gradient(135deg, #f0c94b, #cf9e15); color:#3a2b04 !important; }
+  .t-plum   { background: linear-gradient(135deg, #9a5fbf, #6b3d92); }
+  .t-wine   { background: linear-gradient(135deg, #a2356f, #6d1a52); }
+  .t-brand  { background: linear-gradient(135deg, var(--grad-lime), var(--grad-teal) 55%, var(--brand-purple)); }
+
+  /* ---------- Access notice ---------- */
+  .notice {
+    display: flex; align-items: center; gap: 11px;
+    margin: 30px 0 4px; padding: 14px 18px;
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--brand-gold);
+    border-radius: 12px;
+    background: var(--surface);
+    color: var(--text-muted); font-size: 14px;
+  }
+  .notice svg { color: var(--brand-gold); flex-shrink: 0; }
+  .notice strong { color: var(--text); font-weight: 600; }
+
+  /* ---------- Empty state ---------- */
+  .empty {
+    border: 1px dashed var(--border);
+    border-radius: 16px;
+    padding: 52px 28px; text-align: center;
+    background: var(--surface);
+  }
+  .empty svg { width: 40px; height: 40px; color: var(--text-faint); margin-bottom: 16px; }
+  .empty h3 {
+    font-family: 'Space Grotesk', sans-serif; font-size: 18px; font-weight: 600;
+    margin-bottom: 8px;
+  }
+  .empty p { color: var(--text-muted); font-size: 14px; max-width: 380px; margin: 0 auto; }
+  .empty code {
+    font-family: 'JetBrains Mono', monospace; font-size: 12.5px;
+    background: var(--surface-2); border: 1px solid var(--border-soft);
+    padding: 2px 6px; border-radius: 5px; color: var(--brand-gold);
+  }
+
+  /* ---------- Setup / footer strip ---------- */
+  .setup {
+    margin: 46px 0 30px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 16px; overflow: hidden;
+  }
+  .setup summary {
+    list-style: none; cursor: pointer; padding: 18px 22px;
+    display: flex; align-items: center; gap: 11px;
+    font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 15px;
+  }
+  .setup summary::-webkit-details-marker { display: none; }
+  .setup summary .chev { margin-left: auto; color: var(--text-faint); transition: transform .2s ease; }
+  .setup[open] summary .chev { transform: rotate(180deg); }
+  .setup .body { padding: 0 22px 22px; color: var(--text-muted); font-size: 14px; }
+  .setup .body code {
+    font-family: 'JetBrains Mono', monospace; font-size: 12.5px;
+    background: var(--surface-2); border: 1px solid var(--border-soft);
+    padding: 2px 6px; border-radius: 5px; color: var(--brand-gold);
+  }
+  .setup .body ol { margin: 10px 0 0 18px; display: grid; gap: 8px; }
+
+  footer {
+    text-align: center; color: var(--text-faint); font-size: 12.5px;
+    padding: 24px 0 42px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 900px) { .grid { grid-template-columns: repeat(2, 1fr); } }
   @media (max-width: 620px) {
     .shell { padding: 0 18px; }
+    .grid { grid-template-columns: 1fr; }
     .brand-text .tag { display: none; }
+    .signin span { display: none; }
+    .hero { padding-bottom: 34px; }
   }
-  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; }
+  }
 </style>
 </head>
 <body>
 
-<!-- Ambient CorroHealth arc ripple (same as hub) -->
+<!-- Ambient CorroHealth arc ripple -->
 <svg class="ambient" viewBox="0 0 1100 700" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
   <defs>
     <linearGradient id="rip" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0" stop-color="#9ccb3b"/><stop offset="0.5" stop-color="#35b6b6"/><stop offset="1" stop-color="#5b2d86"/>
+      <stop offset="0" stop-color="#6b3d92"/>
+      <stop offset="1" stop-color="#8e2f6f"/>
     </linearGradient>
   </defs>
-  <g stroke="url(#rip)" stroke-width="2" opacity="0.6">
+  <g stroke="url(#rip)" stroke-width="2" opacity="0.55">
     <circle cx="550" cy="230" r="60"/>
-    <path d="M420 300 A130 130 0 0 0 680 300"/>
-    <path d="M360 320 A190 190 0 0 0 740 320"/>
-    <path d="M300 340 A250 250 0 0 0 800 340"/>
-    <path d="M240 360 A310 310 0 0 0 860 360"/>
+    <path d="M420 230 A130 130 0 0 0 680 230"/>
+    <path d="M360 230 A190 190 0 0 0 740 230"/>
+    <path d="M300 230 A250 250 0 0 0 800 230"/>
+    <path d="M240 230 A310 310 0 0 0 860 230"/>
   </g>
 </svg>
 
 <div class="shell">
 
+  <!-- Top bar -->
   <header>
     <div class="brand">
-      <svg class="mark" viewBox="0 0 120 100" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <!-- Official CorroHealth logo (inlined); wordmark fill follows --logo-word per theme -->
+      <svg class="brand-logo"  xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 701.73 185.06">
         <defs>
-          <linearGradient id="corro" x1="0" y1="0.4" x2="1" y2="0.6">
-            <stop offset="0" stop-color="#9ccb3b"/><stop offset="0.5" stop-color="#35b6b6"/><stop offset="1" stop-color="#5b2d86"/>
+          <style>
+            .chl-1 {
+              fill: var(--logo-word, #fff);
+            }
+
+            .chl-2 {
+              fill: url(#New_Gradient_Swatch_9-3);
+            }
+
+            .chl-3 {
+              fill: url(#New_Gradient_Swatch_9-2);
+            }
+
+            .chl-4 {
+              fill: url(#New_Gradient_Swatch_9);
+            }
+          </style>
+          <linearGradient id="New_Gradient_Swatch_9" data-name="New Gradient Swatch 9" x1="69.91" y1="104.49" x2="166.93" y2="104.49" gradientUnits="userSpaceOnUse">
+            <stop offset="0" stop-color="#dbe134"/>
+            <stop offset=".54" stop-color="#4dc4d3"/>
+            <stop offset="1" stop-color="#512f6f"/>
           </linearGradient>
+          <linearGradient id="New_Gradient_Swatch_9-2" data-name="New Gradient Swatch 9" x1="69.91" y1="97.47" x2="166.93" y2="97.47" xlink:href="#New_Gradient_Swatch_9"/>
+          <linearGradient id="New_Gradient_Swatch_9-3" data-name="New Gradient Swatch 9" y1="79.86" x2="166.93" y2="79.86" xlink:href="#New_Gradient_Swatch_9"/>
         </defs>
-        <g stroke="url(#corro)" stroke-width="7" stroke-linecap="round">
-          <circle cx="60" cy="30" r="12"/>
-          <path d="M38 52 A22 22 0 0 0 82 52"/>
-          <path d="M28 58 A32 32 0 0 0 92 58"/>
-          <path d="M18 64 A42 42 0 0 0 102 64"/>
+        <g>
+          <path class="chl-1" d="M225.02,67.2c6.65,0,18.55,2.8,18.55,10.71v4.83h-6.44v-2.8c0-4.13-7-6.23-11.97-6.23-9.94,0-17.64,7.49-17.64,18.62s7.77,19.39,17.85,19.39,15.61-6.72,15.61-6.72l3.78,5.04s-7,8.26-19.46,8.26c-14.77,0-25.06-11.41-25.06-25.97s10.64-25.13,24.78-25.13Z"/>
+          <path class="chl-1" d="M268.48,81.2c10.57,0,19.11,7.77,19.11,18.48s-8.54,18.62-19.11,18.62-19.04-7.84-19.04-18.62,8.47-18.48,19.04-18.48Zm0,31.22c6.72,0,12.18-5.32,12.18-12.74s-5.46-12.6-12.18-12.6-12.11,5.25-12.11,12.6,5.46,12.74,12.11,12.74Z"/>
+          <path class="chl-1" d="M296.05,89.39c0-1.05-.56-1.54-1.54-1.54h-2.87v-5.81h6.44c3.08,0,4.55,1.26,4.55,4.13v2.24c0,1.4-.14,2.45-.14,2.45h.14c1.68-5.18,5.74-9.24,11.2-9.24,.91,0,1.82,.14,1.82,.14v6.72s-.91-.21-2.03-.21c-4.34,0-8.33,3.08-9.94,8.33-.63,2.03-.84,4.2-.84,6.37v14.49h-6.79v-28.07Z"/>
+          <path class="chl-1" d="M325.03,89.39c0-1.05-.56-1.54-1.54-1.54h-2.87v-5.81h6.44c3.08,0,4.55,1.26,4.55,4.13v2.24c0,1.4-.14,2.45-.14,2.45h.14c1.68-5.18,5.74-9.24,11.2-9.24,.91,0,1.82,.14,1.82,.14v6.72s-.91-.21-2.03-.21c-4.34,0-8.33,3.08-9.94,8.33-.63,2.03-.84,4.2-.84,6.37v14.49h-6.79v-28.07Z"/>
+          <path class="chl-1" d="M366.33,81.2c10.57,0,19.11,7.77,19.11,18.48s-8.54,18.62-19.11,18.62-19.04-7.84-19.04-18.62,8.47-18.48,19.04-18.48Zm0,31.22c6.72,0,12.18-5.32,12.18-12.74s-5.46-12.6-12.18-12.6-12.11,5.25-12.11,12.6,5.46,12.74,12.11,12.74Z"/>
+          <path class="chl-1" d="M395.17,75.6c0-1.05-.56-1.54-1.54-1.54h-3.01v-6.02h7.07c3.15,0,4.48,1.33,4.48,4.48v17.29h25.13v-17.29c0-3.15,1.33-4.48,4.48-4.48h7.07v6.02h-3.01c-.98,0-1.54,.49-1.54,1.54v41.86h-7v-21.7h-25.13v21.7h-7v-41.86Z"/>
+          <path class="chl-1" d="M461.45,81.2c9.94,0,15.26,7.42,15.26,16.59,0,.91-.21,2.8-.21,2.8h-25.83c.42,7.56,5.88,11.83,12.18,11.83s10.36-4.13,10.36-4.13l2.94,4.83s-5.25,5.18-13.65,5.18c-11.2,0-18.83-8.05-18.83-18.55,0-11.27,7.7-18.55,17.78-18.55Zm8.26,14.42c-.21-5.88-3.92-9.03-8.33-9.03-5.18,0-9.38,3.15-10.43,9.03h18.76Z"/>
+          <path class="chl-1" d="M503.73,95.41h1.54v-.35c0-6.23-2.31-8.47-7.84-8.47-1.68,0-5.81,.42-5.81,2.73v2.03h-6.37v-3.5c0-5.81,8.82-6.65,12.25-6.65,11.48,0,14.56,6.02,14.56,13.86v15.05c0,1.05,.56,1.54,1.54,1.54h2.87v5.81h-6.37c-3.15,0-4.41-1.54-4.41-4.06,0-1.19,.14-2.1,.14-2.1h-.14s-2.8,7-11.27,7c-6.09,0-12.04-3.71-12.04-10.78,0-11.41,15.4-12.11,21.35-12.11Zm-7.84,17.43c5.74,0,9.45-6.02,9.45-11.27v-1.19h-1.75c-5.11,0-14.35,.28-14.35,6.79,0,2.87,2.17,5.67,6.65,5.67Z"/>
+          <path class="chl-1" d="M523.67,75.39c0-1.05-.56-1.54-1.54-1.54h-2.87v-5.81h6.72c3.15,0,4.48,1.33,4.48,4.48v37.59c0,1.05,.56,1.54,1.54,1.54h2.87v5.81h-6.72c-3.15,0-4.48-1.33-4.48-4.48v-37.59Z"/>
+          <path class="chl-1" d="M542.85,87.5h-4.62v-5.46h4.76v-9.73h6.65v9.73h8.47v5.46h-8.47v16.24c0,7.07,4.9,7.98,7.49,7.98,.98,0,1.61-.14,1.61-.14v6.02s-.91,.14-2.38,.14c-4.48,0-13.51-1.4-13.51-13.23v-17.01Z"/>
+          <path class="chl-1" d="M566.44,75.39c0-1.05-.56-1.54-1.54-1.54h-2.87v-5.81h6.72c3.15,0,4.48,1.33,4.48,4.34v13.79c0,1.68-.14,2.94-.14,2.94h.14c1.54-3.43,6.09-7.91,13.16-7.91,8.33,0,12.11,4.55,12.11,13.58v15.33c0,1.05,.56,1.54,1.54,1.54h2.87v5.81h-6.65c-3.15,0-4.48-1.33-4.48-4.48v-16.66c0-4.97-1.05-8.89-6.72-8.89s-9.73,3.64-11.2,8.75c-.49,1.4-.63,3.01-.63,4.69v16.59h-6.79v-42.07Z"/>
+        </g>
+        <g>
+          <path class="chl-4" d="M172.46,76.71c-1.74,0-3.15,1.41-3.15,3.15,0,25.43-20.69,46.11-46.11,46.11s-46.11-20.69-46.11-46.11c0-1.74-1.41-3.15-3.15-3.15s-3.15,1.41-3.15,3.15c0,28.9,23.51,52.41,52.41,52.41s52.41-23.51,52.41-52.41c0-1.74-1.41-3.15-3.15-3.15Z"/>
+          <path class="chl-3" d="M123.2,118.24c21.16,0,38.38-17.22,38.38-38.38,0-1.74-1.41-3.15-3.15-3.15s-3.15,1.41-3.15,3.15c0,17.69-14.39,32.07-32.07,32.07s-32.07-14.39-32.07-32.07c0-1.74-1.41-3.15-3.15-3.15s-3.15,1.41-3.15,3.15c0,21.16,17.22,38.38,38.38,38.38Z"/>
+          <path class="chl-2" d="M123.2,102.49c12.48,0,22.63-10.15,22.63-22.63s-10.15-22.63-22.63-22.63-22.63,10.15-22.63,22.63,10.15,22.63,22.63,22.63Zm0-38.95c9,0,16.32,7.32,16.32,16.33s-7.32,16.33-16.32,16.33-16.32-7.32-16.32-16.33,7.32-16.33,16.32-16.33Z"/>
         </g>
       </svg>
-      <div class="brand-text">
-        <span class="name">CorroHealth</span>
-        <span class="tag">Power Tools</span>
-      </div>
+      <span class="tag">Power Tools</span>
     </div>
+
     <div class="top-actions">
-      <a class="back-link" href="../">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
-        Back to hub
-      </a>
       <button class="icon-btn" id="themeBtn" aria-label="Toggle theme" title="Toggle theme">
         <svg id="themeIcon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></svg>
       </button>
+      <button class="signin" id="signInBtn">
+        <svg viewBox="0 0 21 21" width="15" height="15" fill="none"><rect x="1" y="1" width="9" height="9" fill="#f25022"/><rect x="11" y="1" width="9" height="9" fill="#7fba00"/><rect x="1" y="11" width="9" height="9" fill="#00a4ef"/><rect x="11" y="11" width="9" height="9" fill="#ffb900"/></svg>
+        <span>Sign in</span>
+      </button>
+      <div class="account-chip" id="accountChip" style="display:none">
+        <span class="acct-initials" id="acctInitials"></span>
+        <span class="acct-name" id="acctName"></span>
+        <button class="acct-signout" id="signOutBtn" aria-label="Sign out" title="Sign out">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        </button>
+      </div>
     </div>
   </header>
 
+  <!-- Hero -->
   <section class="hero">
-    <div class="ico-row">
-      <div class="ico">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
-      </div>
-      <div>
-        <h1>User Provisioning Wizard</h1>
-        <div class="status-line"><span class="status"><span class="dot"></span>live</span></div>
-      </div>
+    <div>
+      <h1><span class="accent">Power</span> Tools for&nbsp;IT</h1>
+      <p>Browser-based Microsoft&nbsp;365 tenant utilities, authenticated with your work account via MSAL.</p>
     </div>
-    <p>Create Microsoft&nbsp;365 / Entra&nbsp;ID users, assign licenses, and add group memberships — for both Domestic&nbsp;(US) and Global&nbsp;/&nbsp;India onboarding, from one interface. Domestic users are also invited as B2B guests into a separate external tenant.</p>
-    <div class="cta-row">
-      <a class="download" href="UserProvisioningWizard.zip" download>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        Download the tool (.zip)
-      </a>
-    </div>
+    <div class="counter"><span class="live-dot"></span><span id="counterText">— tools · — active</span></div>
   </section>
 
-  <section class="section">
-    <div class="eyebrow">Getting started</div>
-    <div class="panel">
-      <h2>This is a desktop tool</h2>
-      <p>Unlike the browser-based tools on the hub, this one runs locally because it creates users with admin permissions through PowerShell. Download the ZIP, unzip it, and launch it from the folder.</p>
-      <ol>
-        <li>Download and unzip the package. Keep all files together in one folder.</li>
-        <li>Double-click <code>Launch-UserProvisioningWizard.bat</code>.</li>
-        <li>First run on a machine: Windows SmartScreen may prompt — click <strong>More info → Run anyway</strong>.</li>
-        <li>Sign in to Microsoft Graph and Exchange Online when prompted.</li>
-      </ol>
-      <div class="note"><strong>Always launch with the <code>.bat</code>, never the <code>.ps1</code> directly.</strong> Running the <code>.ps1</code> on its own can start PowerShell in the wrong mode and cause a "single-threaded apartment" error at the Exchange sign-in. The <code>.bat</code> avoids this.</div>
-    </div>
-    <div class="panel">
-      <h2>Prerequisites</h2>
-      <ul>
-        <li>Windows PowerShell 5.1 (built in) or PowerShell 7.</li>
-        <li>Modules: <code>Microsoft.Graph</code> and <code>ExchangeOnlineManagement</code>.</li>
-        <li>An account with rights to create users and assign licenses (Graph <code>User.ReadWrite.All</code>, <code>Group.ReadWrite.All</code>, plus Exchange admin).</li>
-        <li>For Domestic batches only: a second sign-in to the external tenant, with rights there to invite guests and edit profiles (Guest Inviter or User Administrator). See "External tenant invites" below.</li>
-      </ul>
-    </div>
-    <div class="panel">
-      <h2>Bringing in users</h2>
-      <ul>
-        <li><strong>Manual entry</strong> — type directly into the grid, including a Manager field. Paste with Ctrl+V straight into a selected text cell, no need to double-click into edit mode first.</li>
-        <li><strong>Upload CSV</strong> — use <code>UserImportTemplate_Domestic.csv</code> (included in the download) for the expected column headers: <code>FirstName, LastName, UserPrincipalName, Designation, Manager, LicenseCode</code>. A row with an India-format country auto-switches the wizard to Global mode.</li>
-        <li><strong>Upload HR Export</strong> — reads a Workday <code>.xlsx</code> export directly, no manual CSV conversion needed. Maps columns by header text rather than fixed position, so it tolerates Workday's export layout drifting between pulls.</li>
-        <li><strong>Bulk-apply panels</strong> above the grid let you stamp one License, Country, Job title, Manager, or Groups value onto every checked row at once — this edits the grid before import, not existing accounts.</li>
-      </ul>
-    </div>
-  </section>
+  <!-- Tool sections render here -->
+  <div id="accessNotice" class="notice" style="display:none">
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+    <span id="accessNoticeText"></span>
+  </div>
 
-  <section class="section">
-    <div class="eyebrow">Reference</div>
-    <div class="panel">
-      <h2>License reference</h2>
-      <table>
-        <tr><th>Global mailbox size</th><th>License granted</th></tr>
-        <tr><td>2GB</td><td>F3</td></tr>
-        <tr><td>50GB</td><td>F3 + Exchange Online Archiving (bigger mailbox)</td></tr>
-        <tr><td>E3</td><td>E3 (full desktop Office)</td></tr>
-        <tr><td>EntApps = Y</td><td>Adds Microsoft 365 Apps for Enterprise</td></tr>
-      </table>
-      <table style="margin-top:16px;">
-        <tr><th>Domestic license</th><th>Granted</th></tr>
-        <tr><td>F3</td><td>F3</td></tr>
-        <tr><td>F3+</td><td>F3 + Microsoft 365 Apps for Enterprise (desktop Office)</td></tr>
-        <tr><td>E3</td><td>E3 (full desktop Office)</td></tr>
-        <tr><td>E5</td><td>E5 (full desktop Office + advanced security/compliance) — Domestic-only</td></tr>
-      </table>
-      <p style="margin-top:12px;">The "+" tier differs by mode: Apps for Enterprise in Domestic, Exchange archiving in Global. Same base licenses otherwise.</p>
-    </div>
-    <div class="panel">
-      <h2>External tenant invites (Domestic mode only)</h2>
-      <p>After a Domestic batch finishes creating users in the home tenant, each new user is also invited as a B2B guest into a separate external tenant — same UPN, no invite email sent, first/last name and job title copied over, no groups or roles assigned there.</p>
-      <ul>
-        <li>Global/India batches are not affected — this only runs for Domestic.</li>
-        <li>The tool signs in a second time, to the external tenant, partway through the run, then reconnects to the home tenant automatically once done.</li>
-        <li>Whoever signs in at that prompt needs rights in the external tenant to invite guests and edit profiles (Guest Inviter or User Administrator).</li>
-        <li>The first time this runs in that tenant, a one-time consent screen may appear for the <code>User.Invite.All</code> and <code>User.ReadWrite.All</code> permissions — an admin there needs to accept it (or check "Consent on behalf of your organization" if offered) so future runs don't prompt again.</li>
-        <li>If the external sign-in or an invite fails, the home-tenant account is still created — the failure is only noted in Status and the results CSV.</li>
-      </ul>
-    </div>
-    <div class="panel">
-      <h2>Safety behavior</h2>
-      <ul>
-        <li>Existing users are never modified — skipped and flagged (enabled or disabled) so they can be handled manually.</li>
-        <li>Invalid rows are skipped individually; the rest of the batch still runs.</li>
-        <li>A missing group or failed license doesn't fail the user; the account is still created and the issue is noted.</li>
-        <li>Passwords: choose auto-generated unique 16-character passwords per user (default), one shared password, or a fixed prefix + random 5-digit suffix (e.g. <code>CorroHealth@@34961</code>). Forced password change at first sign-in is off.</li>
-        <li>A results CSV with per-user status and password is written after each run — treat it as sensitive.</li>
-      </ul>
-    </div>
-  </section>
+  <main id="sections"></main>
 
-  <footer>CorroHealth · Internal IT Tools · <span id="year"></span></footer>
+  <footer>CorroHealth · Internal IT Tools · <span id="version"></span> · <span id="year"></span></footer>
 </div>
 
 <script>
-  const SUN = '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>';
-  const MOON = '<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>';
-  function setTheme(mode){
-    document.documentElement.setAttribute('data-theme', mode);
-    document.getElementById('themeIcon').innerHTML = mode === 'dark' ? MOON : SUN;
-    try { localStorage.setItem('corro-hub-theme', mode); } catch(e){}
-  }
-  document.getElementById('themeBtn').addEventListener('click', () => {
-    const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-    setTheme(next);
+/* ============================================================
+   EDIT YOUR TOOLS HERE
+   ------------------------------------------------------------
+   section : group heading (shown as an eyebrow label)
+   name    : tool title
+   desc    : one-to-two sentence description
+   icon    : key from ICONS below
+   tint    : t-purple | t-magenta | t-gold | t-plum | t-wine | t-brand
+   status  : 'live' | 'updating' | 'down' | 'beta' | 'soon'
+             (green = live, amber = updating, red = down, lavender = beta, grey = soon)
+   auth    : true  -> shows a lock (sign-in required)
+   url     : link the card points to (default '#')
+   ============================================================ */
+
+// Hub version — bump this string whenever you ship a change (shown in the footer).
+const VERSION = 'v1.0';
+
+/* ============================================================
+   SIGN-IN (Microsoft Entra / MSAL)
+   ------------------------------------------------------------
+   Pins sign-in to the CorroHealth tenant, so only Corro accounts
+   can authenticate. The library is loaded via the <script> tag in
+   <head> (shared/msal-browser.min.js). If MSAL isn't present the
+   hub still renders — the Sign in button just won't do anything.
+   ============================================================ */
+const AUTH = {
+  clientId : '7a82c6f1-f8ba-464c-b461-d22cce20f099',   // your app registration (Application/client ID)
+  tenantId : '683d57e7-70bf-4bc4-b88d-bd8905a0c39a',   // CorroHealth tenant — restricts sign-in to Corro accounts
+  // Delegated Graph scopes requested at sign-in. 'User.Read' is enough to sign in and identify
+  // the user. To gate tiles by group membership (GROUP_GATES below), add a scope that permits the
+  // membership check — typically 'Directory.Read.All' or 'GroupMember.Read.All', admin-consented
+  // once in the app registration.
+  scopes   : ['User.Read', 'Directory.Read.All'],
+};
+
+/* ============================================================
+   ADMIN GATES (optional) — lock a tile until the signed-in user
+   is a member of a specific Entra security group.
+   ------------------------------------------------------------
+   Empty = every tile is visible to any signed-in Corro user.
+   To enable: 1) paste a group's OBJECT ID below under a key,
+              2) add `gate: '<that key>'` to any tool in TOOLS,
+              3) add 'Directory.Read.All' to AUTH.scopes above.
+   A gated tile shows a padlock and isn't clickable until the
+   signed-in user is verified (via Graph) as a group member.
+   NOTE: this controls VISIBILITY (a soft/UX gate). The real
+   protection is each tool's own sign-in + least-privilege Graph
+   permissions — the hub gate is not a security boundary on its own.
+   ============================================================ */
+const GROUP_GATES = {
+  admin: 'faf57959-3e0b-4585-b678-57a1427be267',   // CorroHealth admin security group (Object ID)
+};
+
+const TOOLS = [
+
+  {
+    section : 'Device Management',
+    name    : 'Stale Device Cleanup',
+    desc    : 'Find inactive Entra ID devices and disable or delete them. Dry-run by default, with an auto-exported CSV record of every run.',
+    icon    : 'device',
+    tint    : 't-purple',
+    status  : 'live',
+    auth    : true,
+    gate    : 'admin',
+    url     : 'device-cleanup/',
+  },
+
+  {
+    section : 'User Management',
+    name    : 'User Provisioning Wizard',
+    desc    : 'Create Entra ID users, assign licenses, and add group memberships for Domestic (US) and Global / India onboarding. Skips existing users and logs every run.',
+    icon    : 'userplus',
+    tint    : 't-magenta',
+    status  : 'live',
+    auth    : true,
+    gate    : 'admin',
+    url     : 'user-provisioning/',
+  },
+
+  {
+    section : 'User Management',
+    name    : 'User Management Toolkit',
+    desc    : 'Four standalone tools for existing users: add to groups, invite external guests, reset passwords, and update Job Title / Employee ID. Never creates new users.',
+    icon    : 'users',
+    tint    : 't-plum',
+    status  : 'live',
+    auth    : true,
+    gate    : 'admin',
+    url     : 'user-management-tools/',
+  },
+
+  {
+    section : 'Procurement',
+    name    : 'PO Builder',
+    desc    : 'Turn vendor quote PDFs into Corrohealth-formatted purchase orders. Drop in a Softchoice, SAS, Sonar, Smartsheet, or FastSpring quote and get a signed-ready xlsx with vendor info, line items, tax, and totals filled in.',
+    icon    : 'dollar',
+    tint    : 't-gold',
+    status  : 'live',
+    url     : 'po-builder/',
+  },
+
+  // Add one object per tool. Copy the template below, uncomment it, and fill it in.
+  // {
+  //   section : 'Daily Operations',   // heading this tile sits under (new names create new sections)
+  //   name    : 'My Tool Name',
+  //   desc    : 'One or two sentences describing what the tool does.',
+  //   icon    : 'grid',               // key from the ICONS object below
+  //   tint    : 't-purple',           // t-purple | t-magenta | t-gold | t-plum | t-wine | t-brand
+  //   status  : 'live',               // live | updating | down | beta | soon
+  //   auth    : true,                 // true shows the padlock (sign-in required); omit or false to hide
+  //   url     : 'my-tool/',           // relative path to the tool's folder in this repo
+  // },
+
+];
+
+/* Inline icon set — 24x24 stroke glyphs */
+const ICONS = {
+  users:   '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+  userplus:'<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/>',
+  search:  '<circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>',
+  bar:     '<line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/>',
+  shield:  '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
+  guest:   '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="17" y1="11" x2="23" y2="11"/>',
+  wallet:  '<path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4z"/>',
+  grid:    '<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>',
+  device:  '<rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>',
+  dollar:  '<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>',
+};
+
+const LOCK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>';
+
+/* ---- Render ---- */
+function svgWrap(inner){
+  return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+inner+'</svg>';
+}
+
+function render(){
+  const order = [];
+  const groups = {};
+  TOOLS.forEach(t => {
+    if(!groups[t.section]){ groups[t.section] = []; order.push(t.section); }
+    groups[t.section].push(t);
   });
-  (function init(){
-    let saved = 'dark';
-    try { saved = localStorage.getItem('corro-hub-theme') || 'dark'; } catch(e){}
-    setTheme(saved);
-    document.getElementById('year').textContent = new Date().getFullYear();
-  })();
+
+  const host = document.getElementById('sections');
+
+  if(!TOOLS.length){
+    host.innerHTML = `
+      <section class="section">
+        <div class="empty">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg>
+          <h3>No tools yet</h3>
+          <p>Add your first tool to the <code>TOOLS</code> array in this file and it will appear here as a tile.</p>
+        </div>
+      </section>`;
+    document.getElementById('counterText').textContent = '0 tools · 0 active';
+    return;
+  }
+
+  host.innerHTML = order.map(sec => {
+    const cards = groups[sec].map(t => {
+      const locked = t.gate && !unlockedGates.has(t.gate);
+      const showLock = locked || t.auth;
+      const inner = `
+        <div class="ico ${t.tint}">${svgWrap(ICONS[t.icon] || ICONS.grid)}</div>
+        <h3>${t.name}</h3>
+        <p>${t.desc}</p>
+        <div class="foot">
+          ${showLock ? `<span class="lock" title="${locked ? 'Requires access — sign in as an authorized user' : 'Sign-in required'}">${LOCK}</span>` : ''}
+          <span class="status ${t.status}"><span class="dot"></span>${t.status}</span>
+        </div>`;
+      return locked
+        ? `<div class="card locked">${inner}</div>`
+        : `<a class="card" href="${t.url || '#'}">${inner}</a>`;
+    }).join('');
+    return `<section class="section"><div class="eyebrow">${sec}</div><div class="grid">${cards}</div></section>`;
+  }).join('');
+
+  const total = TOOLS.length;
+  const active = TOOLS.filter(t => ['live', 'updating', 'beta'].includes(t.status)).length;
+  document.getElementById('counterText').textContent = `${total} tool${total === 1 ? '' : 's'} · ${active} active`;
+
+  // Access notice: signed in, but a member of none of the gated groups (all gated tiles locked)
+  const notice = document.getElementById('accessNotice');
+  const gatedLockedExist = TOOLS.some(t => t.gate && !unlockedGates.has(t.gate));
+  if(account && gatedLockedExist && unlockedGates.size === 0){
+    document.getElementById('accessNoticeText').innerHTML =
+      `You're signed in as <strong>${account.name || account.username || 'your account'}</strong>, but your account isn't in the group required for the padlocked tools. Contact IT to request access.`;
+    notice.style.display = 'flex';
+  } else {
+    notice.style.display = 'none';
+  }
+}
+
+/* ---- Theme ---- */
+const SUN = '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>';
+const MOON = '<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>';
+
+function setTheme(mode){
+  document.documentElement.setAttribute('data-theme', mode);
+  document.getElementById('themeIcon').innerHTML = mode === 'dark' ? MOON : SUN;
+  try { localStorage.setItem('corro-hub-theme', mode); } catch(e){}
+}
+
+document.getElementById('themeBtn').addEventListener('click', () => {
+  const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  setTheme(next);
+});
+
+/* ---- Sign-in (MSAL) ---- */
+let pca = null;
+let account = null;
+let unlockedGates = new Set();
+
+function initials(name){
+  return (name || '').split(' ').map(w => w[0]).filter(Boolean).join('').slice(0,2).toUpperCase() || 'ME';
+}
+
+function updateAuthUI(){
+  const signInBtn = document.getElementById('signInBtn');
+  const chip = document.getElementById('accountChip');
+  if(account){
+    const name = account.name || account.username || '';
+    signInBtn.style.display = 'none';
+    chip.style.display = 'flex';
+    document.getElementById('acctInitials').textContent = initials(name);
+    document.getElementById('acctName').textContent = name;
+  } else {
+    signInBtn.style.display = '';
+    chip.style.display = 'none';
+  }
+}
+
+async function getToken(){
+  const req = { scopes: AUTH.scopes, account };
+  try { return (await pca.acquireTokenSilent(req)).accessToken; }
+  catch(_) { return (await pca.acquireTokenPopup(req)).accessToken; }
+}
+
+async function runGateChecks(){
+  const keys = Object.keys(GROUP_GATES);
+  if(!keys.length){ unlockedGates = new Set(); return; }
+  try {
+    const token = await getToken();
+    const ids = keys.map(k => GROUP_GATES[k]);
+    const res = await fetch('https://graph.microsoft.com/v1.0/me/checkMemberObjects', {
+      method:'POST',
+      headers:{ Authorization:'Bearer '+token, 'Content-Type':'application/json' },
+      body: JSON.stringify({ ids }),
+    });
+    if(res.ok){
+      const member = (await res.json()).value || [];
+      unlockedGates = new Set(keys.filter(k => member.includes(GROUP_GATES[k])));
+    }
+  } catch(e){ console.warn('Gate check failed:', e); }
+}
+
+async function afterSignIn(){
+  updateAuthUI();
+  await runGateChecks();
+  render();
+}
+
+async function authInit(){
+  const redirectUri = window.location.href.split('#')[0].split('?')[0];
+  console.info('%c[Hub] Redirect URI to register  (App registration → Authentication → Single-page application):\n       ' + redirectUri, 'font-weight:bold;color:#e7b524');
+  if(typeof msal === 'undefined'){ console.warn('[Hub] MSAL library not loaded — add shared/msal-browser.min.js to the repo. Sign-in is disabled until then.'); return; }
+  try {
+    pca = new msal.PublicClientApplication({
+      auth: {
+        clientId: AUTH.clientId,
+        authority: 'https://login.microsoftonline.com/' + AUTH.tenantId,
+        redirectUri,
+      },
+      cache: { cacheLocation: 'localStorage' },
+    });
+    if(pca.initialize) await pca.initialize();          // required by MSAL v3+, harmless on v2
+    const accts = pca.getAllAccounts();
+    if(accts.length){ account = accts[0]; pca.setActiveAccount(account); await afterSignIn(); }
+  } catch(e){ console.warn('Auth init failed:', e); }
+}
+
+async function signIn(){
+  if(!pca){ return; }
+  const btn = document.getElementById('signInBtn');
+  btn.classList.add('loading');
+  try {
+    const res = await pca.loginPopup({ scopes: AUTH.scopes });
+    account = res.account; pca.setActiveAccount(account);
+    await afterSignIn();
+  } catch(e){ console.warn('Sign-in cancelled or failed:', e); }
+  finally { btn.classList.remove('loading'); }
+}
+
+async function signOut(){
+  if(!pca || !account) return;
+  try { await pca.logoutPopup({ account }); } catch(_){}
+  account = null; unlockedGates = new Set();
+  updateAuthUI(); render();
+}
+
+document.getElementById('signInBtn').addEventListener('click', signIn);
+document.getElementById('signOutBtn').addEventListener('click', signOut);
+
+(function init(){
+  let saved = 'dark';
+  try { saved = localStorage.getItem('corro-hub-theme') || 'dark'; } catch(e){}
+  setTheme(saved);
+  document.getElementById('version').textContent = VERSION;
+  document.getElementById('year').textContent = new Date().getFullYear();
+  render();
+  authInit();
+})();
 </script>
 </body>
 </html>

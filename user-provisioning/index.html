@@ -220,6 +220,15 @@
         <li>For Domestic batches only: a second sign-in to the external tenant, with rights there to invite guests and edit profiles (Guest Inviter or User Administrator). See "External tenant invites" below.</li>
       </ul>
     </div>
+    <div class="panel">
+      <h2>Bringing in users</h2>
+      <ul>
+        <li><strong>Manual entry</strong> — type directly into the grid, including a Manager field. Paste with Ctrl+V straight into a selected text cell, no need to double-click into edit mode first.</li>
+        <li><strong>Upload CSV</strong> — use <code>UserImportTemplate_Domestic.csv</code> (included in the download) for the expected column headers: <code>FirstName, LastName, UserPrincipalName, Designation, Manager, LicenseCode</code>. A row with an India-format country auto-switches the wizard to Global mode.</li>
+        <li><strong>Upload HR Export</strong> — reads a Workday <code>.xlsx</code> export directly, no manual CSV conversion needed. Maps columns by header text rather than fixed position, so it tolerates Workday's export layout drifting between pulls.</li>
+        <li><strong>Bulk-apply panels</strong> above the grid let you stamp one License, Country, Job title, Manager, or Groups value onto every checked row at once — this edits the grid before import, not existing accounts.</li>
+      </ul>
+    </div>
   </section>
 
   <section class="section">
@@ -238,6 +247,7 @@
         <tr><td>F3</td><td>F3</td></tr>
         <tr><td>F3+</td><td>F3 + Microsoft 365 Apps for Enterprise (desktop Office)</td></tr>
         <tr><td>E3</td><td>E3 (full desktop Office)</td></tr>
+        <tr><td>E5</td><td>E5 (full desktop Office + advanced security/compliance) — Domestic-only</td></tr>
       </table>
       <p style="margin-top:12px;">The "+" tier differs by mode: Apps for Enterprise in Domestic, Exchange archiving in Global. Same base licenses otherwise.</p>
     </div>
@@ -258,7 +268,7 @@
         <li>Existing users are never modified — skipped and flagged (enabled or disabled) so they can be handled manually.</li>
         <li>Invalid rows are skipped individually; the rest of the batch still runs.</li>
         <li>A missing group or failed license doesn't fail the user; the account is still created and the issue is noted.</li>
-        <li>Unique per-user passwords are generated (or a shared one), forced to change at first sign-in.</li>
+        <li>Passwords: choose auto-generated unique 16-character passwords per user (default), one shared password, or a fixed prefix + random 5-digit suffix (e.g. <code>CorroHealth@@34961</code>). Forced password change at first sign-in is off.</li>
         <li>A results CSV with per-user status and password is written after each run — treat it as sensitive.</li>
       </ul>
     </div>
