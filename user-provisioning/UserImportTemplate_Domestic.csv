@@ -1,0 +1,3 @@
+FirstName,LastName,UserPrincipalName,Designation,Manager,LicenseCode
+Jane,Doe,jane.doe@corrohealth.com,Trainee - HIM,john.smith@corrohealth.com,F3
+John,Sample,,Coder II,jane.doe@corrohealth.com,F3+

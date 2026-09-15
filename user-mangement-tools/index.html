@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>User Management Toolkit · CorroHealth Power Tools</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --brand-purple: #512e6e;
+    --brand-magenta: #5e174d;
+    --brand-gold: #e7b524;
+  }
+  html[data-theme="dark"] {
+    --bg: #140d1e; --surface: #1e1630; --surface-2: #251b3a;
+    --border: #342747; --border-soft: #2a2040;
+    --text: #f3eefb; --text-muted: #a99cc0; --text-faint: #7d7196;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: var(--bg); color: var(--text); line-height: 1.5;
+    min-height: 100vh; -webkit-font-smoothing: antialiased;
+  }
+  .shell { max-width: 880px; margin: 0 auto; padding: 48px 28px 64px; }
+  a.back {
+    display: inline-flex; align-items: center; gap: 6px;
+    color: var(--text-muted); text-decoration: none; font-size: 13.5px;
+    margin-bottom: 28px;
+  }
+  a.back:hover { color: var(--brand-gold); }
+  h1 {
+    font-family: 'Space Grotesk', sans-serif; font-weight: 600;
+    font-size: clamp(28px, 4vw, 40px); letter-spacing: -0.02em;
+    color: #fff; -webkit-text-stroke: 0.7px var(--brand-gold); paint-order: stroke fill;
+    margin-bottom: 10px;
+  }
+  .lede { color: var(--text-muted); font-size: 15px; max-width: 620px; margin-bottom: 34px; }
+  .lede strong { color: var(--text); }
+
+  .download-card {
+    display: flex; align-items: center; justify-content: space-between; gap: 20px;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+    padding: 22px 24px; margin-bottom: 40px; flex-wrap: wrap;
+  }
+  .download-card .info h2 { font-size: 16px; margin-bottom: 4px; }
+  .download-card .info p { font-size: 13px; color: var(--text-muted); }
+  .btn-download {
+    display: inline-flex; align-items: center; gap: 9px;
+    font-size: 14px; font-weight: 500; color: #fff;
+    background: linear-gradient(135deg, var(--brand-purple), var(--brand-magenta));
+    border: none; padding: 12px 20px; border-radius: 9px; cursor: pointer;
+    text-decoration: none; white-space: nowrap;
+    box-shadow: 0 4px 18px -6px rgba(81,46,110,.7);
+    transition: transform .15s ease, box-shadow .2s ease;
+  }
+  .btn-download:hover { transform: translateY(-1px); box-shadow: 0 8px 24px -6px rgba(81,46,110,.85); }
+  .btn-download svg { width: 16px; height: 16px; flex-shrink: 0; }
+
+  .eyebrow {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: .07em;
+    text-transform: uppercase; color: var(--text-faint); margin-bottom: 14px;
+  }
+  .tools { display: grid; gap: 14px; margin-bottom: 40px; }
+  .tool-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+    padding: 18px 20px;
+  }
+  .tool-card h3 { font-size: 15.5px; margin-bottom: 6px; }
+  .tool-card p { font-size: 13.5px; color: var(--text-muted); }
+
+  .note {
+    display: flex; gap: 12px; align-items: flex-start;
+    background: var(--surface-2); border: 1px solid var(--border-soft); border-radius: 12px;
+    padding: 16px 18px; font-size: 13px; color: var(--text-muted);
+  }
+  .note svg { flex-shrink: 0; margin-top: 1px; color: var(--brand-gold); }
+  .note strong { color: var(--text); }
+  footer { margin-top: 48px; font-size: 12px; color: var(--text-faint); }
+</style>
+</head>
+<body>
+<div class="shell">
+  <a class="back" href="../">&larr; Back to Power Tools for IT</a>
+
+  <h1>User Management Toolkit</h1>
+  <p class="lede">
+    Four standalone tools for mass maintenance on <strong>existing</strong>
+    Entra ID / Microsoft 365 users — group membership, external invites,
+    password resets, and Job Title / Employee ID updates. None of these
+    create new users; for that, use the User Provisioning Wizard tile.
+  </p>
+
+  <div class="download-card">
+    <div class="info">
+      <h2>UserManagementToolkit.zip</h2>
+      <p>All 4 tools, their launchers, and per-tool READMEs — one download.</p>
+    </div>
+    <a class="btn-download" href="UserManagementToolkit.zip" download>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Download ZIP
+    </a>
+  </div>
+
+  <div class="eyebrow">What's inside</div>
+  <div class="tools">
+    <div class="tool-card">
+      <h3>Add Users To Group</h3>
+      <p>Adds existing users to one or more Entra ID groups — for a group missed during a bulk import.</p>
+    </div>
+    <div class="tool-card">
+      <h3>Invite External Guests</h3>
+      <p>Retroactively invites existing home-tenant users as B2B guests into the external tenant.</p>
+    </div>
+    <div class="tool-card">
+      <h3>Reset User Passwords</h3>
+      <p>Gives existing users each a new, non-identical password — fixes a batch created with one shared password.</p>
+    </div>
+    <div class="tool-card">
+      <h3>Update User Job Info</h3>
+      <p>Mass-updates Job Title and/or Employee ID (with automatic mirroring to Preferred Data Location).</p>
+    </div>
+  </div>
+
+  <div class="note">
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    <span><strong>Always launch via the matching Launch-*.bat file</strong> — never by double-clicking or running the .ps1 directly, and never via VS Code's F5. Each tool needs STA mode for its sign-in UI, which only the .bat launcher guarantees. Keep each tool's .ps1 and .bat together after unzipping.</span>
+  </div>
+
+  <footer>CorroHealth · Internal IT Tools</footer>
+</div>
+</body>
+</html>
