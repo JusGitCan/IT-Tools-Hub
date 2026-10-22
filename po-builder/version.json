@@ -1,6 +1,6 @@
 {
-  "version": "4.8.0",
-  "date": "May 28, 2026",
+  "version": "4.8.1",
+  "date": "October 22, 2026",
   "downloadUrl": "https://jusgitcan.github.io/IT-Tools-Hub/po-builder/",
-  "changelog": "Initial hub deployment. Vendor parsers for Softchoice (multi-group EA quotes, wrap-artifact tolerance, empty-SKU handling), SonarSource (3-tier discount pricing with custom xlsx layout), SAS Software, Smartsheet, and FastSpring/Iron Software. Automatic tax and delivery extraction. Aligned signature block, tuned column widths."
+  "changelog": "Softchoice parser fix: recognize multi-period billing frequencies such as 'Every 3 Years' and prevent one line item from absorbing the next. Initial hub deployment. Vendor parsers for Softchoice (multi-group EA quotes, wrap-artifact tolerance, empty-SKU handling), SonarSource (3-tier discount pricing with custom xlsx layout), SAS Software, Smartsheet, and FastSpring/Iron Software. Automatic tax and delivery extraction. Aligned signature block, tuned column widths."
 }

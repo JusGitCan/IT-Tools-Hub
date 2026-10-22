@@ -839,7 +839,7 @@ async function parsePDF(file){
       // The lookahead allows underscores and hyphens because Mimecast SKUs like "M_ADV-PRT-CG_10000_A"
       // start with letter+underscore, which the older [A-Z0-9]{3,} wouldn't have caught.
       // Dates are extracted from the middle as a second pass with a lenient date pattern.
-      const scRe=/(\d{10})(?!\s+-)(?=\s+[A-Z0-9_\-]{3,})\s+([\s\S]+?)\s+(\d+)(?:\s+(Annually|Monthly|One[-\s]?time|Annual|Upfront|Quarterly)\s+([\s\S]+?))?\s*\$([\d,]+\.\d{2})\s+\$([\d,]+\.\d{2})/g;
+      const scRe=/(\d{10})(?!\s+-)(?=\s+[A-Z0-9_\-]{3,})\s+((?:(?!\d{10}(?!\s+-)\s+[A-Z0-9_\-]{3,})[\s\S])+?)\s+(\d+)(?:\s+(Annually|Monthly|One[-\s]?time|Annual|Upfront|Quarterly|Every\s+\d+\s+(?:Years?|Months?|Quarters?|Weeks?))\s+([\s\S]+?))?\s*\$([\d,]+\.\d{2})\s+\$([\d,]+\.\d{2})/g;
 
       // Split "SKU + description" into separate fields. SKU is the first 1-3 short uppercase/code-like
       // tokens; rest is description. Examples:
@@ -1647,7 +1647,7 @@ updateBadge();
 //  VERSION & UPDATE CHECK
 // ============================================================
 // Bump APP_VERSION and APP_VERSION_DATE whenever you ship a new build.
-const APP_VERSION = '4.8.0';
+const APP_VERSION = '4.8.1';
 const APP_VERSION_DATE = 'May 28, 2026';
 
 // To enable the "Check for Updates" button, host a small version manifest
